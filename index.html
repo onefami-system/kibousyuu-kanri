@@ -222,10 +222,6 @@
     .print-cal-empty { border: 1px solid #ccc; min-height: 70px; background: #fafafa; }
 
     /* Animations */
-    @keyframes slideInLeft { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: translateX(0); } }
-    @keyframes slideInRight { from { opacity: 0; transform: translateX(24px); } to { opacity: 1; transform: translateX(0); } }
-    .slide-in-left { animation: slideInLeft 250ms cubic-bezier(0.22,1,0.36,1) forwards; }
-    .slide-in-right { animation: slideInRight 250ms cubic-bezier(0.22,1,0.36,1) forwards; }
 
     /* Loading */
     #loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
@@ -700,7 +696,8 @@
   <!-- ローディング画面 -->
   <div id="loading-overlay">
     <div class="spinner"></div>
-    <p style="color:var(--gray-500);font-size:14px;font-weight:500;">データを読み込み中...</p>
+    <p style="color:var(--gray-700);font-size:14px;font-weight:600;margin:0;">データを読み込み中...</p>
+    <p style="color:var(--gray-500);font-size:12px;margin:0;text-align:center;line-height:1.6;">初回読み込みには<br>10秒ほどかかることがあります</p>
   </div>
 
   <header style="background:#fff;border-bottom:1px solid var(--gray-200);box-shadow:var(--shadow-sm);">
@@ -715,11 +712,11 @@
     </div>
   </header>
   <main style="max-width:680px;margin:0 auto;padding:24px 20px;">
-    <nav style="display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin-bottom:28px;overflow-x:auto;" role="tablist">
-      <button id="tab-register" style="padding:10px 20px;font-weight:700;font-size:14px;border:none;background:none;border-bottom:2px solid var(--primary);color:var(--primary);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="true" onclick="switchTab('register')">登録</button>
-      <button id="tab-calendar" style="padding:10px 20px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('calendar')">カレンダー</button>
-      <button id="tab-status" style="padding:10px 20px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('status')">ステータス</button>
-      <button id="tab-staff" style="padding:10px 20px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('staff')">スタッフ管理</button>
+    <nav style="display:flex;gap:0;border-bottom:2px solid var(--gray-200);margin-bottom:28px;" role="tablist">
+      <button id="tab-register" style="flex:1;padding:10px 8px;font-weight:700;font-size:14px;border:none;background:none;border-bottom:2px solid var(--primary);color:var(--primary);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="true" onclick="switchTab('register')">登録</button>
+      <button id="tab-calendar" style="flex:1;padding:10px 8px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('calendar')">カレンダー</button>
+      <button id="tab-status" style="flex:1;padding:10px 8px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('status')">ステータス</button>
+      <button id="tab-staff" style="flex:1;padding:10px 8px;font-weight:600;font-size:14px;border:none;background:none;border-bottom:2px solid transparent;color:var(--gray-500);cursor:pointer;white-space:nowrap;margin-bottom:-2px;letter-spacing:0.01em;" role="tab" aria-selected="false" onclick="switchTab('staff')">スタッフ管理</button>
     </nav>
     <div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"></div>
 
@@ -1361,8 +1358,6 @@
     }
 
     function switchTab(tab) {
-      const oldIndex = TAB_INDICES[currentTab], newIndex = TAB_INDICES[tab];
-      const isMovingRight = newIndex > oldIndex;
       ['register','calendar','status','staff'].forEach(t => {
         const btn = document.getElementById('tab-' + t); const view = document.getElementById('view-' + t);
         if (t === currentTab) { btn.style.borderBottomColor='transparent'; btn.style.color='var(--gray-500)'; btn.style.fontWeight='600'; view.classList.add('hidden'); }
@@ -1370,17 +1365,13 @@
           view.classList.remove('hidden');
           btn.style.borderBottomColor='var(--primary)'; btn.style.color='var(--primary)'; btn.style.fontWeight='700';
           if (tab === 'calendar') {
-            void view.offsetHeight;
             renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderConfirmedFilterButtons(); renderCalendar(); setupStaffFilterPanel();
-            requestAnimationFrame(() => { view.classList.add(isMovingRight ? 'slide-in-right' : 'slide-in-left'); setTimeout(() => view.classList.remove('slide-in-left','slide-in-right'), 300); });
-          } else {
-            requestAnimationFrame(() => { requestAnimationFrame(() => {
-              view.classList.add(isMovingRight ? 'slide-in-right' : 'slide-in-left');
-              setTimeout(() => view.classList.remove('slide-in-left','slide-in-right'), 300);
-              if (tab === 'register') { renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateRegisterGuide(); renderStepProgress(); }
-              if (tab === 'staff') { renderJobChips(); renderStoreChips(); populateJobSelect(document.getElementById('staff-job'), false); populateStoreSelect(document.getElementById('staff-store'), false); renderStaffList(); }
-              if (tab === 'status') { statusYear = currentYear; statusMonth = currentMonth; renderStatusView(); }
-            }); });
+          } else if (tab === 'register') {
+            renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateRegisterGuide(); renderStepProgress();
+          } else if (tab === 'staff') {
+            renderJobChips(); renderStoreChips(); populateJobSelect(document.getElementById('staff-job'), false); populateStoreSelect(document.getElementById('staff-store'), false); renderStaffList();
+          } else if (tab === 'status') {
+            statusYear = currentYear; statusMonth = currentMonth; renderStatusView();
           }
         }
       });
@@ -1588,8 +1579,8 @@
         renderFinalArea();
       }
 
-      // スクロールを先頭に戻す
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // スクロールを先頭に戻す（瞬時）
+      window.scrollTo({ top: 0, behavior: 'auto' });
     }
 
     function renderStepProgress() {
