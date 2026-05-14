@@ -127,6 +127,8 @@
     .btn-danger:hover { background: #ffe3e3; }
     .btn-success-outline { background: var(--success-light); color: var(--success); border: 1px solid #b2f2bb; font-size: 12px; padding: 4px 10px; border-radius: var(--radius-sm); }
     .btn-gray-outline { background: var(--gray-100); color: var(--gray-600); font-size: 12px; padding: 4px 10px; border-radius: var(--radius-sm); }
+    .btn-edit-outline { background: var(--primary-light); color: var(--primary-dark); border: 1px solid var(--primary-mid); font-size: 12px; padding: 4px 10px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; }
+    .btn-edit-outline:hover { background: #dbeafe; }
     button:active { transform: scale(0.97); }
 
     /* Filter buttons */
@@ -150,10 +152,75 @@
     .cal-day:hover { background: var(--primary-light) !important; }
     .cal-day.selected { background: var(--primary-mid) !important; }
 
-    /* Badge */
+    /* Badge (legacy, kept for safety) */
     .badge { font-size: 10px; line-height: 1; padding: 2px 4px; border-radius: 4px; font-weight: 600; }
-    .badge-confirmed { box-shadow: 0 0 0 2px #2f9e44; }
-    .priority-num { font-size: 8px; margin-left: 1px; }
+
+    /* Calendar event badge (new pill style) */
+    .cal-day-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 3px;
+    }
+    .cal-event-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-size: 10px;
+      line-height: 1.55;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .cal-event-badge .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+      letter-spacing: 0.02em;
+    }
+    .cal-event-badge .type {
+      font-size: 9px;
+      font-weight: 600;
+      opacity: 0.85;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+    .cal-event-badge.confirmed {
+      box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.85), 0 0 0 1.5px #2f9e44;
+    }
+    .cal-day-more {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--gray-500);
+      padding: 1px 6px;
+      background: var(--gray-100);
+      border-radius: 6px;
+      text-align: center;
+      line-height: 1.55;
+    }
+
+    /* Drag and drop (PC/mouse only) */
+    @media (hover: hover) and (pointer: fine) {
+      .cal-event-badge[draggable="true"] {
+        cursor: grab;
+      }
+      .cal-event-badge[draggable="true"]:active {
+        cursor: grabbing;
+      }
+      .cal-event-badge.dragging {
+        opacity: 0.4;
+      }
+      .cal-day.drag-over {
+        background: var(--primary-light) !important;
+        outline: 2px dashed var(--primary);
+        outline-offset: -3px;
+      }
+    }
 
     /* Chips */
     .job-chip, .store-chip {
@@ -1180,6 +1247,42 @@
     </div>
   </div>
 
+  <!-- Re-Request Confirm Modal -->
+  <div id="rerequest-modal" class="hidden">
+    <div class="fixed inset-0 bg-black/50 z-[180] flex items-center justify-center p-4" onclick="closeRerequestModal(event)">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="font-bold text-lg text-gray-800">この申請を編集（再申請）</h3>
+        </div>
+        <div class="px-6 py-4">
+          <div id="rerequest-body" class="text-gray-700 text-sm leading-relaxed"></div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex gap-2 justify-end">
+          <button type="button" class="btn btn-secondary" onclick="closeRerequestModal()">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="submitRerequest()">削除して再申請へ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drag&Drop Confirm Modal -->
+  <div id="drag-confirm-modal" class="hidden">
+    <div class="fixed inset-0 bg-black/50 z-[180] flex items-center justify-center p-4" onclick="closeDragConfirmModal(event)">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="font-bold text-lg text-gray-800">希望休を移動しますか？</h3>
+        </div>
+        <div class="px-6 py-4">
+          <div id="drag-confirm-body" class="text-gray-700 text-sm leading-relaxed"></div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex gap-2 justify-end">
+          <button type="button" class="btn btn-secondary" onclick="closeDragConfirmModal()">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="submitDragConfirm()">移動する</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Admin Password Modal -->
   <div id="admin-password-modal" class="hidden">
     <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onclick="closeAdminPasswordModal(event)">
@@ -1210,7 +1313,7 @@
     // =============================================
     // ★ 管理者パスワード（必ず変更してください） ★
     // =============================================
-    const ADMIN_PASSWORD = 'onefami0901';
+    const ADMIN_PASSWORD = 'admin1234';
     // =============================================
 
     // 管理者パスワード認証
@@ -1249,6 +1352,140 @@
       if (e.key === 'Enter') { e.preventDefault(); submitAdminPassword(); }
       else if (e.key === 'Escape') { e.preventDefault(); closeAdminPasswordModal(); }
     });
+
+    // ============================================
+    // ドラッグ&ドロップ（PC専用）
+    // ============================================
+    const IS_DESKTOP = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    let _dragConfirmResolve = null;
+    let _dragRecordId = null;
+
+    function showDragConfirm(record, newDate) {
+      return new Promise((resolve) => {
+        _dragConfirmResolve = resolve;
+        const body = document.getElementById('drag-confirm-body');
+        const oldDateFmt = fmtDate(record.request_date);
+        const newDateFmt = fmtDate(newDate);
+        const confirmedNote = isConfirmed(record) ? '<div style="margin-top:8px;color:var(--danger);font-weight:700;font-size:13px;">⚠ この希望休は<u>確定済み</u>です。移動すると勤務予定が変わります。</div>' : '';
+        body.innerHTML = `
+          <div><strong>${esc(record.staff_name)}</strong>さんの希望休を移動します。</div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px;justify-content:center;background:var(--gray-50);padding:10px;border-radius:8px;">
+            <span style="font-weight:700;">${oldDateFmt}</span>
+            <span style="color:var(--gray-400);">→</span>
+            <span style="font-weight:700;color:var(--primary);">${newDateFmt}</span>
+          </div>
+          <div style="margin-top:8px;color:var(--gray-600);font-size:12.5px;">休暇種別：${esc(record.leave_type || '')}</div>
+          ${confirmedNote}
+        `;
+        document.getElementById('drag-confirm-modal').classList.remove('hidden');
+      });
+    }
+    function submitDragConfirm() {
+      document.getElementById('drag-confirm-modal').classList.add('hidden');
+      if (_dragConfirmResolve) { _dragConfirmResolve(true); _dragConfirmResolve = null; }
+    }
+    function closeDragConfirmModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('drag-confirm-modal').classList.add('hidden');
+      if (_dragConfirmResolve) { _dragConfirmResolve(false); _dragConfirmResolve = null; }
+    }
+
+    async function handleDragDrop(recordId, newDate) {
+      const record = requestRecords.find(r => r._id === recordId);
+      if (!record) return;
+      if (record.request_date === newDate) return; // 同じ日付ならスキップ
+      // 同じスタッフ・同じ日付・同じ種別の重複チェック
+      if (requestRecords.some(r => r.staff_name === record.staff_name && r.request_date === newDate && r.leave_type === record.leave_type && r._id !== recordId)) {
+        showToast('同じ希望休が既に登録されています', true);
+        return;
+      }
+      const ok = await showDragConfirm(record, newDate);
+      if (!ok) return;
+      record.request_date = newDate;
+      const res = await window.dataSdk.update(record);
+      if (res.isOk) {
+        showToast('希望休を移動しました');
+      } else {
+        showToast('移動に失敗しました', true);
+      }
+    }
+
+    // ============================================
+    // 再申請（編集）機能
+    // ============================================
+    let _rerequestResolve = null;
+    function showRerequestConfirm(staffName, year, month) {
+      return new Promise((resolve) => {
+        _rerequestResolve = resolve;
+        const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}`;
+        const recs = requestRecords.filter(r => r.staff_name === staffName && r.request_date && r.request_date.startsWith(monthPrefix));
+        const totalCount = recs.length;
+        const confirmedCount = recs.filter(r => isConfirmed(r)).length;
+        const body = document.getElementById('rerequest-body');
+        body.innerHTML = `
+          <div><strong>${esc(staffName)}</strong>さんの<strong>${year}年${month+1}月</strong>の申請内容を削除して、再申請します。</div>
+          <div style="margin-top:10px;padding:10px 12px;background:var(--gray-50);border-radius:8px;border:1px solid var(--gray-200);">
+            <div style="font-size:13px;color:var(--gray-700);">削除される申請：<strong>${totalCount}件</strong></div>
+            ${confirmedCount > 0 ? `<div style="font-size:13px;color:var(--danger);margin-top:4px;font-weight:700;">⚠ うち確定済み：${confirmedCount}件</div>` : ''}
+          </div>
+          <div style="margin-top:10px;font-size:12.5px;color:var(--gray-600);line-height:1.6;">
+            確認後、登録タブに切り替わり、${esc(staffName)}さんが選択された状態でSTEP1から入力できます。
+          </div>
+        `;
+        document.getElementById('rerequest-modal').classList.remove('hidden');
+      });
+    }
+    function submitRerequest() {
+      document.getElementById('rerequest-modal').classList.add('hidden');
+      if (_rerequestResolve) { _rerequestResolve(true); _rerequestResolve = null; }
+    }
+    function closeRerequestModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('rerequest-modal').classList.add('hidden');
+      if (_rerequestResolve) { _rerequestResolve(false); _rerequestResolve = null; }
+    }
+
+    async function editRequest(staffName, year, month) {
+      const ok = await showRerequestConfirm(staffName, year, month);
+      if (!ok) return;
+
+      // そのスタッフ・対象月の申請を全削除
+      const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}`;
+      const records = [...requestRecords.filter(r => r.staff_name === staffName && r.request_date && r.request_date.startsWith(monthPrefix))];
+      for (const rec of records) {
+        await window.dataSdk.delete(rec);
+      }
+
+      // 登録タブのターゲット月を編集対象の月に合わせる
+      targetYear = year;
+      targetMonth = month + 1; // 1-based
+
+      // ヘッダー更新
+      const heading = document.getElementById('form-heading-text');
+      const subtitle = document.getElementById('form-subtitle-text');
+      if (heading) heading.textContent = `${targetMonth}月 希望休を申請`;
+      if (subtitle) subtitle.textContent = `${targetYear}年${targetMonth}月分の希望休を4ステップで登録します`;
+
+      // カレンダー状態を初期化
+      initRegisterCalendars();
+      resetRegisterState();
+
+      // 登録タブに切り替え
+      switchTab('register');
+
+      // スタッフを自動選択
+      setTimeout(() => {
+        const sel = document.getElementById('staff-name');
+        if (sel) {
+          const hasOption = [...sel.options].some(o => o.value === staffName);
+          if (hasOption) {
+            sel.value = staffName;
+            onStaffChange();
+          }
+        }
+        showToast(`${staffName}さんの${targetMonth}月の申請を削除しました。再申請してください。`);
+      }, 100);
+    }
 
     // Google Apps Script API
     async function gasRequest(params) {
@@ -1357,6 +1594,7 @@
     const STORE_PALETTE = ['#475569','#0d9488','#d97706','#7c3aed','#be185d','#0369a1','#b45309','#64748b','#059669','#c2410c'];
     const PRIORITY_LABELS = { 1: '①', 2: '②', 3: '③' };
     const LEAVE_TYPE_ABBR = { '全休': '全', '午前休（9時〜14時）': '午前', '午後休（13時〜18時）': '午後' };
+    const LEAVE_TYPE_BADGE = { '全休': '', '午前休（9時〜14時）': 'AM', '午後休（13時〜18時）': 'PM' };
     const LEAVE_TYPE_PRINT = { '全休': '全休', '午前休（9時〜14時）': '午前', '午後休（13時〜18時）': '午後' };
 
     // 職種グループ定義（混雑判定用）
@@ -2361,19 +2599,65 @@
       for (let i = 0; i < startDow; i++) { const c = document.createElement('div'); c.className = 'bg-white p-1 min-h-[3rem]'; grid.appendChild(c); }
       for (let d = 1; d <= lastDay; d++) {
         const dateStr = `${prefix}-${String(d).padStart(2,'0')}`;
-        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.style.cssText = 'background:#fff;padding:4px;min-height:3rem;cursor:pointer;font-size:13px;';
+        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.style.cssText = 'background:#fff;padding:4px 3px;min-height:3.5rem;cursor:pointer;font-size:13px;';
         if (dateStr === selectedDate) cell.classList.add('selected');
-        cell.innerHTML = `<div class="font-medium">${d}</div>`;
+        cell.innerHTML = `<div style="font-weight:600;color:var(--gray-800);padding:0 2px;">${d}</div>`;
+        // PC: ドロップターゲットとして登録
+        if (IS_DESKTOP) {
+          cell.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            cell.classList.add('drag-over');
+          });
+          cell.addEventListener('dragleave', () => { cell.classList.remove('drag-over'); });
+          cell.addEventListener('drop', (e) => {
+            e.preventDefault();
+            cell.classList.remove('drag-over');
+            const recId = e.dataTransfer.getData('text/plain');
+            if (recId) handleDragDrop(recId, dateStr);
+          });
+        }
         const dayReqs = monthData.filter(r => r.request_date === dateStr);
         if (dayReqs.length) {
-          const badges = document.createElement('div'); badges.className = 'flex flex-wrap gap-0.5 mt-0.5';
+          const badges = document.createElement('div'); badges.className = 'cal-day-badges';
           dayReqs.slice(0,3).forEach(r => {
-            const b = document.createElement('span'); b.className = 'badge text-white inline-flex items-center text-xs' + (isConfirmed(r) ? ' badge-confirmed' : '');
-            b.style.background = staffColor(r.staff_name); b.textContent = r.staff_name.substring(0, 2);
-            const ta = document.createElement('span'); ta.className = 'priority-num opacity-80'; ta.textContent = LEAVE_TYPE_ABBR[r.leave_type] || ''; b.appendChild(ta);
+            const b = document.createElement('span');
+            b.className = 'cal-event-badge' + (isConfirmed(r) ? ' confirmed' : '');
+            b.style.background = staffColor(r.staff_name);
+            const nameEl = document.createElement('span');
+            nameEl.className = 'name';
+            nameEl.textContent = r.staff_name.substring(0, 2);
+            b.appendChild(nameEl);
+            const typeLabel = LEAVE_TYPE_BADGE[r.leave_type];
+            if (typeLabel) {
+              const typeEl = document.createElement('span');
+              typeEl.className = 'type';
+              typeEl.textContent = typeLabel;
+              b.appendChild(typeEl);
+            }
+            // PC: バッジをドラッグ可能に
+            if (IS_DESKTOP && r._id) {
+              b.draggable = true;
+              b.title = 'ドラッグして別の日付に移動できます';
+              b.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', r._id);
+                e.dataTransfer.effectAllowed = 'move';
+                b.classList.add('dragging');
+                // 親セルのクリックイベント発火を防止
+                e.stopPropagation();
+              });
+              b.addEventListener('dragend', () => { b.classList.remove('dragging'); });
+              // バッジ上でのクリックを伝播停止（セルのクリックが発火しないように）
+              b.addEventListener('click', (e) => e.stopPropagation());
+            }
             badges.appendChild(b);
           });
-          if (dayReqs.length > 3) { const m = document.createElement('span'); m.className = 'badge bg-gray-300 text-gray-600'; m.textContent = `+${dayReqs.length-3}`; badges.appendChild(m); }
+          if (dayReqs.length > 3) {
+            const m = document.createElement('span');
+            m.className = 'cal-day-more';
+            m.textContent = `+${dayReqs.length - 3}`;
+            badges.appendChild(m);
+          }
           cell.appendChild(badges);
         }
         cell.addEventListener('click', () => { selectedDate = dateStr; renderCalendar(); renderDayDetail(dateStr); });
@@ -2456,6 +2740,18 @@
           const ub = document.createElement('button'); ub.className = 'btn-gray-outline'; ub.textContent = '取消';
           ub.addEventListener('click', async () => { ub.disabled = true; ub.textContent = '...'; await window.dataSdk.update(setConfirmed(r, false)); renderCalendar(); renderDayDetail(selectedDate); ub.disabled = false; ub.textContent = '取消'; }); actDiv.appendChild(ub);
         }
+        // 再申請ボタン
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-edit-outline';
+        editBtn.textContent = '✏️ 再申請';
+        editBtn.title = 'この申請を編集（削除して再申請）';
+        editBtn.addEventListener('click', () => {
+          const parts = r.request_date.split('-');
+          const recYear = parseInt(parts[0]);
+          const recMonth = parseInt(parts[1]) - 1;
+          editRequest(r.staff_name, recYear, recMonth);
+        });
+        actDiv.appendChild(editBtn);
         const delBtn = document.createElement('button'); delBtn.className = 'text-red-400 hover:text-red-600 p-1 rounded text-xs'; delBtn.innerHTML = '<i data-lucide="trash-2" style="width:16px;height:16px"></i>';
         delBtn.addEventListener('click', () => showDetailDeleteConfirm(actDiv, r));
         actDiv.appendChild(delBtn); row.appendChild(actDiv); container.appendChild(row);
@@ -2496,6 +2792,18 @@
           const ub = document.createElement('button'); ub.className = 'btn-gray-outline'; ub.textContent = '取消';
           ub.addEventListener('click', async () => { ub.disabled = true; ub.textContent = '...'; await window.dataSdk.update(setConfirmed(r, false)); ub.disabled = false; ub.textContent = '取消'; }); actions.appendChild(ub);
         }
+        // 再申請ボタン
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-edit-outline';
+        editBtn.textContent = '✏️ 再申請';
+        editBtn.title = 'この申請を編集（削除して再申請）';
+        editBtn.addEventListener('click', () => {
+          const parts = r.request_date.split('-');
+          const recYear = parseInt(parts[0]);
+          const recMonth = parseInt(parts[1]) - 1;
+          editRequest(r.staff_name, recYear, recMonth);
+        });
+        actions.appendChild(editBtn);
         const delBtn = document.createElement('button'); delBtn.className = 'text-red-400 hover:text-red-600 p-1 rounded text-xs'; delBtn.innerHTML = '<i data-lucide="trash-2" style="width:16px;height:16px"></i>';
         delBtn.addEventListener('click', () => showDeleteConfirm(row, r));
         actions.appendChild(delBtn); row.appendChild(info); row.appendChild(actions); list.appendChild(row);
