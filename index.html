@@ -236,6 +236,453 @@
     @keyframes popIn { 0%{transform:scale(0)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
     @keyframes drawCheck { to { stroke-dashoffset: 0; } }
 
+    /* ============================== */
+    /* 4-STEP REGISTER UI             */
+    /* ============================== */
+    .step-progress {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .step-progress-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .step-progress-circle {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--gray-200);
+      color: var(--gray-500);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      transition: all 0.2s;
+    }
+    .step-progress-item.active .step-progress-circle {
+      background: var(--primary); color: #fff;
+      box-shadow: 0 0 0 4px rgba(59,91,219,0.15);
+    }
+    .step-progress-item.done .step-progress-circle {
+      background: var(--success); color: #fff;
+    }
+    .step-progress-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--gray-500);
+      letter-spacing: 0.02em;
+    }
+    .step-progress-item.active .step-progress-label,
+    .step-progress-item.done .step-progress-label {
+      color: var(--gray-800);
+    }
+
+    /* STEP1 type cards */
+    .type-card {
+      width: 100%;
+      background: #fff;
+      border: 2px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 22px 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.18s;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+    }
+    .type-card:hover {
+      border-color: var(--primary-mid);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+    .type-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59,91,219,0.12), var(--shadow);
+    }
+    .type-card-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .type-card.selected .type-card-icon {
+      background: var(--primary); color: #fff;
+    }
+    .type-card-title {
+      font-size: 16px; font-weight: 700; color: var(--gray-900);
+      margin-bottom: 2px;
+    }
+    .type-card-desc {
+      font-size: 12.5px; color: var(--gray-600);
+    }
+    .type-card-check {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--gray-300);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      margin-left: auto;
+      transition: all 0.18s;
+    }
+    .type-card.selected .type-card-check {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    /* Mini calendar (register tab) */
+    .reg-cal-wrapper {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      box-shadow: var(--shadow-sm);
+    }
+    .reg-cal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .reg-cal-nav {
+      background: var(--gray-100);
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      color: var(--gray-700);
+      transition: background 0.15s;
+    }
+    .reg-cal-nav:hover { background: var(--gray-200); }
+    .reg-cal-month-label { font-weight: 700; font-size: 15px; color: var(--gray-900); }
+    .reg-cal-dow {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 11px; font-weight: 700;
+      color: var(--gray-500);
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+    .reg-cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+    .reg-cal-day {
+      aspect-ratio: 1 / 1;
+      background: var(--gray-50);
+      border: 1.5px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-800);
+      transition: all 0.12s;
+      padding: 2px;
+      position: relative;
+    }
+    .reg-cal-day:hover:not(.disabled) {
+      background: var(--primary-light);
+      border-color: var(--primary-mid);
+    }
+    .reg-cal-day.empty { background: transparent; cursor: default; }
+    .reg-cal-day.disabled { color: var(--gray-300); cursor: not-allowed; background: transparent; }
+    .reg-cal-day.today {
+      box-shadow: inset 0 0 0 1.5px var(--gray-400);
+    }
+    .reg-cal-day.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(59,91,219,0.35);
+    }
+    .reg-cal-day.selected .congestion-mark { color: #fff !important; }
+    .reg-cal-day.selected .day-number { color: #fff !important; }
+    .day-number { font-size: 14px; font-weight: 700; line-height: 1; }
+    .congestion-mark {
+      font-size: 14px; line-height: 1; font-weight: 700;
+    }
+    .congestion-low { color: #2f9e44; }
+    .congestion-mid { color: #e67700; }
+    .congestion-high { color: #e03131; }
+
+    .leg-row {
+      display: flex; gap: 12px; flex-wrap: wrap;
+      font-size: 11px; color: var(--gray-600);
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--gray-200);
+    }
+    .leg-item { display: inline-flex; align-items: center; gap: 4px; }
+
+    /* Time slot pills */
+    .time-pill-group { display: flex; gap: 8px; margin-top: 8px; }
+    .time-pill {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1.5px solid var(--gray-300);
+      background: #fff;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .time-pill:hover { border-color: var(--primary-mid); }
+    .time-pill.selected {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 2px 6px rgba(59,91,219,0.3);
+    }
+
+    /* Slot label */
+    .slot-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 700; color: var(--gray-700);
+      margin-bottom: 6px;
+    }
+    .slot-num {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    /* Selected date display */
+    .selected-date-display {
+      background: var(--success-light);
+      border: 1.5px solid #b2f2bb;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-size: 13.5px;
+      color: #2b8a3e;
+      font-weight: 600;
+      margin-top: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Congestion warning */
+    .congestion-warning {
+      background: #fff5f5;
+      border: 1.5px solid #ffc9c9;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-top: 12px;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .congestion-warning-title {
+      font-size: 13px; font-weight: 700; color: var(--danger);
+      margin-bottom: 2px;
+    }
+    .congestion-warning-text {
+      font-size: 12px; color: #c92a2a; line-height: 1.5;
+    }
+
+    /* Step navigation */
+    .step-nav {
+      display: flex; gap: 10px; margin-top: 24px;
+    }
+    .step-nav .btn { flex: 1; padding: 13px; font-size: 14px; }
+
+    /* Fixed bottom CTA on step4 */
+    .cta-fixed-bottom {
+      position: sticky;
+      bottom: 0;
+      left: 0; right: 0;
+      background: #fff;
+      padding: 14px 0;
+      border-top: 1px solid var(--gray-200);
+      margin-top: 20px;
+      box-shadow: 0 -4px 12px rgba(0,0,0,0.04);
+      z-index: 5;
+    }
+
+    /* Summary card */
+    .summary-card {
+      background: linear-gradient(135deg, var(--primary-light) 0%, #f0f4ff 100%);
+      border: 1px solid var(--primary-mid);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .summary-staff-block {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+    .summary-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--gray-200);
+      font-size: 14px;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .date-part { font-weight: 700; color: var(--gray-900); }
+    .summary-row .type-part {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .summary-total {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 2px solid var(--primary-mid);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .summary-total-value {
+      font-size: 22px;
+      color: var(--primary);
+    }
+
+    /* Staff select panel button */
+    .staff-select-btn {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid var(--gray-300);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--gray-900);
+      cursor: pointer;
+      text-align: left;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: all 0.15s;
+    }
+    .staff-select-btn:hover { border-color: var(--primary-mid); }
+    .staff-select-btn.placeholder { color: var(--gray-500); font-weight: 500; }
+
+    /* Status cards */
+    .status-card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .status-card-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .status-card-name {
+      font-weight: 700;
+      font-size: 14.5px;
+      color: var(--gray-900);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-card-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      color: #fff;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .status-card-tags {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .status-card-row2 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12.5px;
+      color: var(--gray-700);
+      border-top: 1px dashed var(--gray-200);
+      padding-top: 8px;
+    }
+    .status-card-days {
+      font-weight: 600;
+    }
+    .status-card-days-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .status-card-status {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .status-done { background: #d3f9d8; color: #2b8a3e; }
+    .status-partial { background: #fff3bf; color: #846100; }
+    .status-applied { background: #d0ebff; color: #1864ab; }
+    .status-not-applied { background: #ffe3e3; color: #c92a2a; }
+    .status-card-dates {
+      font-size: 12px;
+      color: var(--gray-600);
+      line-height: 1.5;
+    }
+    .status-card-dates-empty { color: var(--gray-400); font-style: italic; }
+
+    /* Verification toggle */
+    .verify-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      border-top: 1px dashed var(--gray-200);
+      padding-top: 8px;
+      margin-top: 2px;
+    }
+    .verify-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 999px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1.5px solid #ffc9c9;
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+    .verify-btn:hover { background: #ffe3e3; }
+    .verify-btn.verified {
+      background: var(--success-light);
+      border-color: #b2f2bb;
+      color: #2b8a3e;
+    }
+    .verify-btn.verified:hover {
+      background: #d3f9d8;
+    }
+    .verify-btn svg { flex-shrink: 0; }
+
     @media print {
       body * { visibility: hidden !important; }
       #print-modal, #print-modal * { visibility: visible !important; }
@@ -276,116 +723,236 @@
     </nav>
     <div id="toast-container" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"></div>
 
-    <!-- Register View -->
+    <!-- ============================================ -->
+    <!-- Register View (4-STEP)                       -->
+    <!-- ============================================ -->
     <section id="view-register">
-      <h2 style="font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:20px;letter-spacing:-0.02em;" id="form-heading-text"></h2>
-      <div class="info-box info-box-blue">
-        <p class="text-sm text-blue-800">📌 希望休は第3希望まで登録できます</p>
-        <p class="text-sm text-blue-800">📌 半休（午前・午後）の場合は補完半休も登録できます</p>
-        <p class="text-sm text-blue-800">📌 登録後は「カレンダー」タブで確認・確定できます</p>
+      <h2 style="font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:8px;letter-spacing:-0.02em;" id="form-heading-text"></h2>
+      <p id="form-subtitle-text" style="font-size:13px;color:var(--gray-500);margin-bottom:18px;"></p>
+
+      <!-- Progress bar -->
+      <div class="step-progress" id="step-progress">
+        <div class="step-progress-item" data-step="1">
+          <div class="step-progress-circle">1</div>
+          <div class="step-progress-label">休暇タイプ</div>
+        </div>
+        <div class="step-progress-item" data-step="2">
+          <div class="step-progress-circle">2</div>
+          <div class="step-progress-label">日付選択</div>
+        </div>
+        <div class="step-progress-item" data-step="3">
+          <div class="step-progress-circle">3</div>
+          <div class="step-progress-label">確認</div>
+        </div>
+        <div class="step-progress-item" data-step="4">
+          <div class="step-progress-circle">4</div>
+          <div class="step-progress-label">申請</div>
+        </div>
       </div>
+
+      <!-- Guide message when no jobs/stores/staff -->
       <div id="register-guide-msg" class="info-box info-box-amber hidden">
         まず「スタッフ管理」タブで職種・店舗・スタッフを登録してください
       </div>
-      <form id="request-form" class="space-y-4" onsubmit="handleSubmit(event)">
-        <div>
-          <label class="block mb-2 font-medium text-sm text-gray-700">職種で絞り込み</label>
-          <div id="register-job-filter-buttons" class="flex gap-2 flex-wrap"></div>
-        </div>
-        <div>
-          <label class="block mb-2 font-medium text-sm text-gray-700">店舗で絞り込み</label>
-          <div id="register-store-filter-buttons" class="flex gap-2 flex-wrap"></div>
-        </div>
-        <div>
-          <label class="block mb-1 font-medium text-sm text-gray-700" for="staff-name">スタッフ名</label>
-          <select id="staff-name" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" required>
+
+      <!-- Staff Selector (common to all steps) -->
+      <div id="staff-selector-block" class="card" style="padding:14px 16px;margin-bottom:18px;">
+        <label class="block mb-2 font-medium text-sm" style="color:var(--gray-700);">スタッフを選択</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="register-job-filter-buttons"></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="register-store-filter-buttons"></div>
+          <select id="staff-name" class="w-full" style="margin-top:4px;" onchange="onStaffChange()">
             <option value="" disabled selected>選択してください</option>
           </select>
-          <p id="err-name" class="text-red-500 text-sm mt-1 hidden">スタッフ名を選択してください</p>
-          <p id="no-staff-msg" class="text-amber-600 text-sm mt-1 hidden">スタッフを先に登録してください</p>
+          <p id="no-staff-msg" class="text-amber-600 text-sm hidden">スタッフを先に登録してください</p>
         </div>
-        <div>
-          <label class="block mb-1 font-medium text-sm text-gray-700" for="date1">第1希望日</label>
-          <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" type="date" id="date1" onchange="validateDateMonth(1); toggleComplement(1)">
-          <p id="err-date1" class="text-red-500 text-sm mt-1 hidden">第1希望日を選択してください</p>
-          <p id="err-month-date1" class="text-red-500 text-sm mt-1 hidden"></p>
-          <label class="block mt-2 mb-1 font-medium text-sm text-gray-700" for="type1">休暇種別</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="type1" onchange="toggleComplement(1)">
-            <option value="全休">全休</option>
-            <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-            <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-          </select>
-          <div id="complement1-section" class="hidden mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block font-medium text-sm text-gray-700">補完半休日</label>
-              <button type="button" class="text-gray-400 hover:text-gray-600 font-bold text-lg" onclick="closeComplement(1)">×</button>
+      </div>
+
+      <!-- ============================== -->
+      <!-- STEP 1: 休暇タイプ選択         -->
+      <!-- ============================== -->
+      <div id="step1-content" class="step-content">
+        <h3 style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:12px;">どの休暇タイプにしますか？</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button type="button" class="type-card" data-type="full" onclick="selectLeaveType('full')">
+            <div class="type-card-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             </div>
-            <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2" type="date" id="complement1-date" onchange="validateDateMonth('complement1')">
-            <p id="err-month-complement1" class="text-red-500 text-sm mt-1 hidden"></p>
-            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="complement1-type">
-              <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-              <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-            </select>
+            <div style="flex:1;min-width:0;">
+              <div class="type-card-title">全休</div>
+              <div class="type-card-desc">1日まるごとお休み（=1.0日）</div>
+            </div>
+            <div class="type-card-check">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </button>
+
+          <button type="button" class="type-card" data-type="half" onclick="selectLeaveType('half')">
+            <div class="type-card-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="type-card-title">半休×2</div>
+              <div class="type-card-desc">半休を2件登録（合計1.0日）</div>
+            </div>
+            <div class="type-card-check">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </button>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn btn-primary" id="step1-next-btn" onclick="goToStep(2)" disabled style="opacity:0.5;">次へ進む</button>
+        </div>
+      </div>
+
+      <!-- ============================== -->
+      <!-- STEP 2: 日付選択              -->
+      <!-- ============================== -->
+      <div id="step2-content" class="step-content hidden">
+        <div class="info-box info-box-blue" style="margin-bottom:14px;">
+          <strong style="font-size:13px;">混雑状況を見ながら日付を選びましょう</strong>
+          <div style="margin-top:4px;font-size:12px;">職種グループ別に同日の希望休件数を表示しています</div>
+        </div>
+
+        <!-- 全休: 日付1件 -->
+        <div id="full-day-section" class="hidden">
+          <div class="slot-label">
+            <span class="slot-num">1</span>
+            <span>全休にする日を選んでください</span>
+          </div>
+          <div class="reg-cal-wrapper">
+            <div class="reg-cal-head">
+              <button type="button" class="reg-cal-nav" onclick="changeRegMonth(-1)" aria-label="前月">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <span class="reg-cal-month-label" id="reg-cal-month-label"></span>
+              <button type="button" class="reg-cal-nav" onclick="changeRegMonth(1)" aria-label="次月">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+            <div class="reg-cal-dow">
+              <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+            </div>
+            <div class="reg-cal-grid" id="full-cal-grid"></div>
+            <div class="leg-row">
+              <span class="leg-item"><span class="congestion-mark congestion-low">◎</span>空きあり</span>
+              <span class="leg-item"><span class="congestion-mark congestion-mid">△</span>やや混雑</span>
+              <span class="leg-item"><span class="congestion-mark congestion-high">×</span>希望集中</span>
+            </div>
+          </div>
+          <div id="full-selected-display"></div>
+          <div id="full-warning-area"></div>
+        </div>
+
+        <!-- 半休×2: 日付2件 -->
+        <div id="half-day-section" class="hidden">
+          <!-- 半休1 -->
+          <div style="margin-bottom:18px;">
+            <div class="slot-label">
+              <span class="slot-num">1</span>
+              <span>1件目の半休を選んでください</span>
+            </div>
+            <div class="reg-cal-wrapper">
+              <div class="reg-cal-head">
+                <button type="button" class="reg-cal-nav" onclick="changeRegMonth(-1, 1)" aria-label="前月">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="reg-cal-month-label" id="reg-cal-month-label-h1"></span>
+                <button type="button" class="reg-cal-nav" onclick="changeRegMonth(1, 1)" aria-label="次月">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+              <div class="reg-cal-dow">
+                <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+              </div>
+              <div class="reg-cal-grid" id="half1-cal-grid"></div>
+              <div class="leg-row">
+                <span class="leg-item"><span class="congestion-mark congestion-low">◎</span>空きあり</span>
+                <span class="leg-item"><span class="congestion-mark congestion-mid">△</span>やや混雑</span>
+                <span class="leg-item"><span class="congestion-mark congestion-high">×</span>希望集中</span>
+              </div>
+            </div>
+            <div class="time-pill-group">
+              <button type="button" class="time-pill" data-half="1" data-time="am" onclick="selectHalfTime(1,'am')">午前休<br><span style="font-size:11px;opacity:0.85;font-weight:500;">9時〜14時</span></button>
+              <button type="button" class="time-pill" data-half="1" data-time="pm" onclick="selectHalfTime(1,'pm')">午後休<br><span style="font-size:11px;opacity:0.85;font-weight:500;">13時〜18時</span></button>
+            </div>
+            <div id="half1-selected-display"></div>
+            <div id="half1-warning-area"></div>
+          </div>
+
+          <!-- 半休2 -->
+          <div>
+            <div class="slot-label">
+              <span class="slot-num">2</span>
+              <span>2件目の半休を選んでください</span>
+            </div>
+            <div class="reg-cal-wrapper">
+              <div class="reg-cal-head">
+                <button type="button" class="reg-cal-nav" onclick="changeRegMonth(-1, 2)" aria-label="前月">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <span class="reg-cal-month-label" id="reg-cal-month-label-h2"></span>
+                <button type="button" class="reg-cal-nav" onclick="changeRegMonth(1, 2)" aria-label="次月">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+              <div class="reg-cal-dow">
+                <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+              </div>
+              <div class="reg-cal-grid" id="half2-cal-grid"></div>
+              <div class="leg-row">
+                <span class="leg-item"><span class="congestion-mark congestion-low">◎</span>空きあり</span>
+                <span class="leg-item"><span class="congestion-mark congestion-mid">△</span>やや混雑</span>
+                <span class="leg-item"><span class="congestion-mark congestion-high">×</span>希望集中</span>
+              </div>
+            </div>
+            <div class="time-pill-group">
+              <button type="button" class="time-pill" data-half="2" data-time="am" onclick="selectHalfTime(2,'am')">午前休<br><span style="font-size:11px;opacity:0.85;font-weight:500;">9時〜14時</span></button>
+              <button type="button" class="time-pill" data-half="2" data-time="pm" onclick="selectHalfTime(2,'pm')">午後休<br><span style="font-size:11px;opacity:0.85;font-weight:500;">13時〜18時</span></button>
+            </div>
+            <div id="half2-selected-display"></div>
+            <div id="half2-warning-area"></div>
           </div>
         </div>
-        <div id="priority2-button-container">
-          <button type="button" class="btn btn-secondary" style="width:100%;border:1.5px dashed var(--primary-mid);color:var(--primary);background:var(--primary-light);" onclick="togglePriority2()">＋ 第2希望を追加</button>
+
+        <!-- Running total -->
+        <div id="running-total" style="margin-top:18px;padding:12px 14px;background:var(--primary-light);border-radius:var(--radius);font-size:14px;font-weight:700;color:var(--primary-dark);display:flex;justify-content:space-between;align-items:center;">
+          <span>現在の合計</span>
+          <span id="running-total-value" style="font-size:18px;">0.0日</span>
         </div>
-        <div id="priority2-section" class="hidden">
-          <h3 class="font-semibold text-sm text-indigo-700 mb-2">第2希望</h3>
-          <label class="block mb-1 font-medium text-sm text-gray-700" for="date2">第2希望日</label>
-          <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" type="date" id="date2" onchange="validateDateMonth(2); toggleComplement(2)">
-          <p id="err-month-date2" class="text-red-500 text-sm mt-1 hidden"></p>
-          <label class="block mt-2 mb-1 font-medium text-sm text-gray-700" for="type2">休暇種別</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="type2" onchange="toggleComplement(2)">
-            <option value="全休">全休</option>
-            <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-            <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-          </select>
-          <div id="complement2-section" class="hidden mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block font-medium text-sm text-gray-700">補完半休日</label>
-              <button type="button" class="text-gray-400 hover:text-gray-600 font-bold text-lg" onclick="closeComplement(2)">×</button>
-            </div>
-            <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2" type="date" id="complement2-date" onchange="validateDateMonth('complement2')">
-            <p id="err-month-complement2" class="text-red-500 text-sm mt-1 hidden"></p>
-            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="complement2-type">
-              <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-              <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-            </select>
-          </div>
-          <button type="button" class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="closePriority2()">閉じる</button>
+
+        <div class="step-nav">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(1)">戻る</button>
+          <button type="button" class="btn btn-primary" id="step2-next-btn" onclick="goToStep(3)" disabled style="opacity:0.5;">確認する</button>
         </div>
-        <div id="priority3-button-container">
-          <button type="button" class="btn btn-secondary" style="width:100%;border:1.5px dashed var(--primary-mid);color:var(--primary);background:var(--primary-light);" onclick="togglePriority3()">＋ 第3希望を追加</button>
+      </div>
+
+      <!-- ============================== -->
+      <!-- STEP 3: 確認画面              -->
+      <!-- ============================== -->
+      <div id="step3-content" class="step-content hidden">
+        <h3 style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:12px;">申請内容を確認してください</h3>
+        <div id="confirm-area"></div>
+        <div class="step-nav">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(2)">戻って修正する</button>
+          <button type="button" class="btn btn-primary" onclick="goToStep(4)">この内容で申請する</button>
         </div>
-        <div id="priority3-section" class="hidden">
-          <h3 class="font-semibold text-sm text-indigo-700 mb-2">第3希望</h3>
-          <label class="block mb-1 font-medium text-sm text-gray-700" for="date3">第3希望日</label>
-          <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" type="date" id="date3" onchange="validateDateMonth(3); toggleComplement(3)">
-          <p id="err-month-date3" class="text-red-500 text-sm mt-1 hidden"></p>
-          <label class="block mt-2 mb-1 font-medium text-sm text-gray-700" for="type3">休暇種別</label>
-          <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="type3" onchange="toggleComplement(3)">
-            <option value="全休">全休</option>
-            <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-            <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-          </select>
-          <div id="complement3-section" class="hidden mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <div class="flex items-center justify-between mb-2">
-              <label class="block font-medium text-sm text-gray-700">補完半休日</label>
-              <button type="button" class="text-gray-400 hover:text-gray-600 font-bold text-lg" onclick="closeComplement(3)">×</button>
-            </div>
-            <input class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-2" type="date" id="complement3-date" onchange="validateDateMonth('complement3')">
-            <p id="err-month-complement3" class="text-red-500 text-sm mt-1 hidden"></p>
-            <select class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400" id="complement3-type">
-              <option value="午前休（9時〜14時）">午前休（9時〜14時）</option>
-              <option value="午後休（13時〜18時）">午後休（13時〜18時）</option>
-            </select>
-          </div>
-          <button type="button" class="btn btn-secondary" style="width:100%;margin-top:12px;" onclick="closePriority3()">閉じる</button>
+      </div>
+
+      <!-- ============================== -->
+      <!-- STEP 4: 申請                  -->
+      <!-- ============================== -->
+      <div id="step4-content" class="step-content hidden">
+        <h3 style="font-size:15px;font-weight:700;color:var(--gray-800);margin-bottom:12px;">最終確認</h3>
+        <div id="final-area"></div>
+        <div class="cta-fixed-bottom">
+          <button type="button" class="btn btn-primary" style="width:100%;padding:15px;font-size:16px;font-weight:700;border-radius:var(--radius);" id="submit-btn" onclick="submitRequest()">
+            申請する
+          </button>
+          <button type="button" class="btn btn-secondary" style="width:100%;margin-top:8px;padding:11px;" onclick="goToStep(3)">戻る</button>
         </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;border-radius:var(--radius);">希望休を登録する</button>
-      </form>
+      </div>
     </section>
 
     <!-- Calendar View -->
@@ -396,7 +963,6 @@
       </div>
       <div class="mb-4"><label class="block mb-2 font-medium text-sm text-gray-700">職種で絞り込み</label><div id="job-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
       <div class="mb-4"><label class="block mb-2 font-medium text-sm text-gray-700">店舗で絞り込み</label><div id="store-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
-      <div class="mb-4"><label class="block mb-2 font-medium text-sm text-gray-700">希望順位で絞り込み</label><div id="priority-filter-buttons" class="flex gap-2"></div></div>
       <div class="mb-4"><label class="block mb-2 font-medium text-sm text-gray-700">確定状態で絞り込み</label><div id="confirmed-filter-buttons" class="flex gap-2"></div></div>
       <div class="mb-4">
         <label class="block mb-2 font-medium text-sm text-gray-700">スタッフで絞り込み</label>
@@ -434,7 +1000,6 @@
             <i data-lucide="chevron-down" style="width:20px;height:20px"></i>
           </button>
         </div>
-        <button type="button" class="btn btn-danger" style="width:100%;margin-bottom:12px;" onclick="openBulkDeleteModal()">確定済みスタッフの他の希望を一括削除</button>
         <div id="monthly-list" class="space-y-2 hidden"></div>
       </div>
     </section>
@@ -450,21 +1015,9 @@
       <div class="mb-4"><div id="status-job-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
       <div class="mb-4"><div id="status-store-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
       <div id="status-summary" class="flex gap-3 mb-4"></div>
-      <div id="status-table-container" class="overflow-x-auto">
+      <div id="status-card-container">
         <p id="status-no-staff" class="text-gray-400 italic hidden">スタッフが登録されていません</p>
-        <table id="status-table" class="w-full text-sm hidden">
-          <thead>
-            <tr class="border-b border-gray-300 text-left">
-              <th class="py-2 px-2 font-semibold">スタッフ名</th>
-              <th class="py-2 px-2 font-semibold">職種</th>
-              <th class="py-2 px-2 font-semibold">店舗</th>
-              <th class="py-2 px-2 font-semibold text-center">確定済み日数</th>
-              <th class="py-2 px-2 font-semibold">確定日</th>
-              <th class="py-2 px-2 font-semibold text-center">ステータス</th>
-            </tr>
-          </thead>
-          <tbody id="status-tbody"></tbody>
-        </table>
+        <div id="status-card-list" class="space-y-2"></div>
       </div>
     </section>
 
@@ -532,23 +1085,6 @@
           </div>
         </div>
         <div id="print-calendar-area"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bulk Delete Modal -->
-  <div id="bulk-delete-modal" class="hidden">
-    <div class="fixed inset-0 bg-black/50 z-[150] flex items-center justify-center" onclick="closeBulkDeleteModal(event)">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-11/12" onclick="event.stopPropagation()">
-        <div class="px-6 py-4 border-b border-gray-200"><h3 class="font-bold text-lg text-gray-800">確定済みスタッフの他の希望を削除</h3></div>
-        <div class="px-6 py-4">
-          <p class="text-gray-700 mb-4">以下のスタッフは休暇が確定しているので他の希望を削除します。</p>
-          <div id="bulk-delete-staff-list" class="bg-gray-50 rounded-lg p-4 mb-4 max-h-60 overflow-y-auto"></div>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-200 flex gap-2 justify-end">
-          <button type="button" class="btn btn-secondary" onclick="closeBulkDeleteModal()">キャンセル</button>
-          <button type="button" class="btn btn-primary" style="background:var(--danger);" onclick="confirmBulkDelete()">削除</button>
-        </div>
       </div>
     </div>
   </div>
@@ -657,8 +1193,7 @@
     // アプリ本体
     // =============================================
     let allRawData = [];
-    let requestRecords = [], jobTypeRecords = [], storeRecords = [], staffRecords = [];
-    let priority2Open = false, priority3Open = false;
+    let requestRecords = [], jobTypeRecords = [], storeRecords = [], staffRecords = [], verificationRecords = [];
     const TAB_INDICES = { 'register': 0, 'calendar': 1, 'status': 2, 'staff': 3 };
     let currentTab = 'register';
     let currentYear, currentMonth, selectedDate = null;
@@ -675,7 +1210,7 @@
       m++; m++; if (m > 12) { m = 1; y++; } return { year: y, month: m };
     }
     let targetYear = getTargetMonth().year, targetMonth = getTargetMonth().month;
-    let staffSortMode = 'name', bulkDeleteModalState = null, monthlyListExpanded = true, priorityWarningState = null;
+    let staffSortMode = 'name', monthlyListExpanded = true, priorityWarningState = null;
 
     const COLORS = ['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#ef4444','#8b5cf6','#14b8a6','#f97316','#06b6d4','#84cc16','#e11d48'];
     const JOB_PALETTE = ['#10b981','#3b82f6','#8b5cf6','#f59e0b','#ec4899','#ef4444','#14b8a6','#06b6d4','#84cc16','#f97316'];
@@ -684,11 +1219,54 @@
     const LEAVE_TYPE_ABBR = { '全休': '全', '午前休（9時〜14時）': '午前', '午後休（13時〜18時）': '午後' };
     const LEAVE_TYPE_PRINT = { '全休': '全休', '午前休（9時〜14時）': '午前', '午後休（13時〜18時）': '午後' };
 
+    // 職種グループ定義（混雑判定用）
+    const JOB_GROUPS = {
+      '看護師グループ': ['看護師'],
+      'リハビリ職グループ': ['理学療法士', '作業療法士', '言語聴覚士']
+    };
+    function getJobGroup(jobName) {
+      for (const [groupName, jobs] of Object.entries(JOB_GROUPS)) {
+        if (jobs.includes(jobName)) return groupName;
+      }
+      return null;
+    }
+
     function classifyData() {
       requestRecords = allRawData.filter(r => r.record_type === 'request' || !r.record_type);
       jobTypeRecords = allRawData.filter(r => r.record_type === 'job_type');
       storeRecords = allRawData.filter(r => r.record_type === 'store');
       staffRecords = allRawData.filter(r => r.record_type === 'staff');
+      verificationRecords = allRawData.filter(r => r.record_type === 'verification');
+    }
+
+    // 「確認OK」（クラウド勤怠との照合済み）レコード操作
+    function getVerificationRec(staffName, period) {
+      // period = 'YYYY-MM' 形式
+      return verificationRecords.find(r => r.staff_name === staffName && r.request_date && r.request_date.startsWith(period));
+    }
+    function isVerified(staffName, period) {
+      return !!getVerificationRec(staffName, period);
+    }
+    async function toggleVerification(staffName, year, month) {
+      const period = `${year}-${String(month).padStart(2,'0')}`;
+      const existing = getVerificationRec(staffName, period);
+      if (existing) {
+        await window.dataSdk.delete(existing);
+      } else {
+        await window.dataSdk.create({
+          record_type: 'verification',
+          staff_name: staffName,
+          request_date: `${period}-01`,
+          priority: 0,
+          reason: '',
+          created_at: new Date().toISOString(),
+          job_type_name: '',
+          store_name: '',
+          staff_job: '',
+          staff_store: '',
+          leave_type: ''
+        });
+      }
     }
 
     function getJobTypes() { return jobTypeRecords.map(r => r.job_type_name).filter(Boolean); }
@@ -701,11 +1279,6 @@
     function staffColor(name) { let h = 0; for (let i = 0; i < name.length; i++) h = name.charCodeAt(i) + ((h << 5) - h); return COLORS[Math.abs(h) % COLORS.length]; }
     function getLeaveValue(type) { if (!type) return 0; if (type === '全休') return 1.0; if (type === '午前休（9時〜14時）' || type === '午後休（13時〜18時）') return 0.5; return 0; }
     function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-
-    function togglePriority2() { priority2Open = true; document.getElementById('priority2-section').classList.remove('hidden'); document.getElementById('date2').focus(); }
-    function closePriority2() { priority2Open = false; document.getElementById('priority2-section').classList.add('hidden'); document.getElementById('date2').value = ''; document.getElementById('type2').value = '全休'; document.getElementById('complement2-date').value = ''; document.getElementById('complement2-section').classList.add('hidden'); }
-    function togglePriority3() { priority3Open = true; document.getElementById('priority3-section').classList.remove('hidden'); document.getElementById('date3').focus(); }
-    function closePriority3() { priority3Open = false; document.getElementById('priority3-section').classList.add('hidden'); document.getElementById('date3').value = ''; document.getElementById('type3').value = '全休'; document.getElementById('complement3-date').value = ''; document.getElementById('complement3-section').classList.add('hidden'); }
 
     function isConfirmed(r) { try { return JSON.parse(r.reason || '{}').confirmed === true; } catch { return false; } }
     function setConfirmed(r, val) { r.reason = JSON.stringify({ confirmed: val }); return r; }
@@ -798,15 +1371,15 @@
           btn.style.borderBottomColor='var(--primary)'; btn.style.color='var(--primary)'; btn.style.fontWeight='700';
           if (tab === 'calendar') {
             void view.offsetHeight;
-            renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderPriorityFilterButtons(); renderConfirmedFilterButtons(); renderCalendar(); setupStaffFilterPanel();
+            renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderConfirmedFilterButtons(); renderCalendar(); setupStaffFilterPanel();
             requestAnimationFrame(() => { view.classList.add(isMovingRight ? 'slide-in-right' : 'slide-in-left'); setTimeout(() => view.classList.remove('slide-in-left','slide-in-right'), 300); });
           } else {
             requestAnimationFrame(() => { requestAnimationFrame(() => {
               view.classList.add(isMovingRight ? 'slide-in-right' : 'slide-in-left');
               setTimeout(() => view.classList.remove('slide-in-left','slide-in-right'), 300);
-              if (tab === 'register') { renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateRegisterGuide(); }
+              if (tab === 'register') { renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateRegisterGuide(); renderStepProgress(); }
               if (tab === 'staff') { renderJobChips(); renderStoreChips(); populateJobSelect(document.getElementById('staff-job'), false); populateStoreSelect(document.getElementById('staff-store'), false); renderStaffList(); }
-              if (tab === 'status') renderStatusView();
+              if (tab === 'status') { statusYear = currentYear; statusMonth = currentMonth; renderStatusView(); }
             }); });
           }
         }
@@ -815,7 +1388,8 @@
     }
 
     function updateRegisterGuide() {
-      document.getElementById('register-guide-msg').classList.toggle('hidden', getJobTypes().length > 0 && getStores().length > 0 && getStaffList().length > 0);
+      const hasAll = getJobTypes().length > 0 && getStores().length > 0 && getStaffList().length > 0;
+      document.getElementById('register-guide-msg').classList.toggle('hidden', hasAll);
     }
 
     function populateStaffSelect() {
@@ -925,23 +1499,591 @@
       c.appendChild(t); setTimeout(() => t.remove(), 3000);
     }
 
-    function toggleComplement(n) {
-      const type = document.getElementById(`type${n}`).value; const section = document.getElementById(`complement${n}-section`);
-      const dateInput = document.getElementById(`date${n}`); const dateComplement = document.getElementById(`complement${n}-date`); const typeComplement = document.getElementById(`complement${n}-type`);
-      if (type === '全休') { section.classList.add('hidden'); }
-      else { section.classList.remove('hidden'); if (!dateComplement.value && dateInput.value) dateComplement.value = dateInput.value; typeComplement.value = type === '午前休（9時〜14時）' ? '午後休（13時〜18時）' : '午前休（9時〜14時）'; }
-    }
-    function closeComplement(n) { document.getElementById(`complement${n}-section`).classList.add('hidden'); document.getElementById(`complement${n}-date`).value = ''; document.getElementById(`type${n}`).value = '全休'; }
+    // ============================================
+    // 4-STEP REGISTER LOGIC
+    // ============================================
+    const registerState = {
+      step: 1,
+      leaveType: null,    // 'full' | 'half'
+      fullDate: null,     // 全休: 'YYYY-MM-DD'
+      half1Date: null,    // 半休1
+      half1Time: null,    // 'am' | 'pm'
+      half2Date: null,
+      half2Time: null,
+      // カレンダー表示用の年月（各セクション独立）
+      calYear: 0,
+      calMonth: 0,
+      calYearH1: 0,
+      calMonthH1: 0,
+      calYearH2: 0,
+      calMonthH2: 0,
+    };
 
-    function validateDateMonth(fieldName) {
-      let dateStr, errorElId;
-      if ([1,2,3].includes(fieldName)) { dateStr = document.getElementById(`date${fieldName}`).value; errorElId = `err-month-date${fieldName}`; }
-      else { dateStr = document.getElementById(`${fieldName}-date`).value; errorElId = `err-month-${fieldName}`; }
-      const errorEl = document.getElementById(errorElId); if (!errorEl) return true;
-      if (!dateStr) { errorEl.classList.add('hidden'); return true; }
-      const parts = dateStr.split('-'); const dateYear = parseInt(parts[0]); const dateMonth = parseInt(parts[1]);
-      if (dateYear !== targetYear || dateMonth !== targetMonth) { errorEl.textContent = `${targetYear}年${targetMonth}月の日付を選択してください`; errorEl.classList.remove('hidden'); return false; }
-      errorEl.classList.add('hidden'); return true;
+    function initRegisterCalendars() {
+      // 対象月（2か月先）を初期表示にする
+      registerState.calYear = targetYear;
+      registerState.calMonth = targetMonth; // 1始まり
+      registerState.calYearH1 = targetYear;
+      registerState.calMonthH1 = targetMonth;
+      registerState.calYearH2 = targetYear;
+      registerState.calMonthH2 = targetMonth;
+    }
+
+    function selectLeaveType(type) {
+      registerState.leaveType = type;
+      document.querySelectorAll('.type-card').forEach(c => {
+        c.classList.toggle('selected', c.dataset.type === type);
+      });
+      const nextBtn = document.getElementById('step1-next-btn');
+      nextBtn.disabled = false;
+      nextBtn.style.opacity = '1';
+    }
+
+    function onStaffChange() {
+      // スタッフ変更時、混雑度カレンダーを再描画
+      if (registerState.step === 2) {
+        renderRegCalendars();
+      }
+    }
+
+    function goToStep(n) {
+      // バリデーション
+      const staffName = document.getElementById('staff-name').value;
+      if (n >= 2 && !staffName) {
+        showToast('スタッフを選択してください', true);
+        return;
+      }
+      if (n >= 2 && !registerState.leaveType) {
+        showToast('休暇タイプを選択してください', true);
+        return;
+      }
+      if (n >= 3) {
+        // STEP2 → STEP3 のバリデーション
+        if (registerState.leaveType === 'full') {
+          if (!registerState.fullDate) { showToast('日付を選択してください', true); return; }
+        } else {
+          if (!registerState.half1Date || !registerState.half1Time) { showToast('1件目の半休を選択してください', true); return; }
+          if (!registerState.half2Date || !registerState.half2Time) { showToast('2件目の半休を選択してください', true); return; }
+          if (registerState.half1Date === registerState.half2Date) { showToast('1件目と2件目は別の日付を選んでください', true); return; }
+        }
+      }
+
+      registerState.step = n;
+      renderStepProgress();
+      ['step1','step2','step3','step4'].forEach((s, i) => {
+        document.getElementById(s + '-content').classList.toggle('hidden', (i + 1) !== n);
+      });
+
+      // ステップごとの追加処理
+      if (n === 2) {
+        // 全休/半休 表示切替
+        document.getElementById('full-day-section').classList.toggle('hidden', registerState.leaveType !== 'full');
+        document.getElementById('half-day-section').classList.toggle('hidden', registerState.leaveType !== 'half');
+        renderRegCalendars();
+        updateRunningTotal();
+        updateStep2NextBtn();
+      } else if (n === 3) {
+        renderConfirmArea();
+      } else if (n === 4) {
+        renderFinalArea();
+      }
+
+      // スクロールを先頭に戻す
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function renderStepProgress() {
+      document.querySelectorAll('.step-progress-item').forEach(item => {
+        const s = parseInt(item.dataset.step);
+        item.classList.remove('active', 'done');
+        if (s === registerState.step) item.classList.add('active');
+        else if (s < registerState.step) item.classList.add('done');
+      });
+    }
+
+    function changeRegMonth(delta, slot) {
+      if (!slot) {
+        // 全休カレンダー
+        let m = registerState.calMonth + delta;
+        let y = registerState.calYear;
+        if (m > 12) { m = 1; y++; }
+        if (m < 1) { m = 12; y--; }
+        registerState.calYear = y; registerState.calMonth = m;
+      } else if (slot === 1) {
+        let m = registerState.calMonthH1 + delta;
+        let y = registerState.calYearH1;
+        if (m > 12) { m = 1; y++; }
+        if (m < 1) { m = 12; y--; }
+        registerState.calYearH1 = y; registerState.calMonthH1 = m;
+      } else if (slot === 2) {
+        let m = registerState.calMonthH2 + delta;
+        let y = registerState.calYearH2;
+        if (m > 12) { m = 1; y++; }
+        if (m < 1) { m = 12; y--; }
+        registerState.calYearH2 = y; registerState.calMonthH2 = m;
+      }
+      renderRegCalendars();
+    }
+
+    // 混雑度: 指定日において、選択中スタッフと同じ職種グループの希望休件数（半休も1件として数える）
+    // 申請者本人がすでに別の希望を出している場合は含めない（=自分以外の人数）
+    function getCongestionCount(dateStr, staffName) {
+      const job = getStaffJob(staffName);
+      const store = getStaffStore(staffName);
+      const group = getJobGroup(job);
+      if (!group) return 0; // グループ外なら混雑度判定なし
+      const groupJobs = JOB_GROUPS[group];
+      const count = requestRecords.filter(r => {
+        if (r.request_date !== dateStr) return false;
+        if (r.staff_name === staffName) return false; // 自分は除く
+        const rJob = getStaffJob(r.staff_name);
+        const rStore = getStaffStore(r.staff_name);
+        if (rStore !== store) return false; // 同一店舗のみ
+        return groupJobs.includes(rJob);
+      })
+      // 同じ日に同じスタッフが複数件登録している場合は1件として数える
+      .reduce((acc, r) => {
+        if (!acc.has(r.staff_name)) acc.add(r.staff_name);
+        return acc;
+      }, new Set()).size;
+      return count;
+    }
+
+    function congestionMark(count) {
+      if (count <= 1) return { mark: '◎', cls: 'congestion-low' };
+      if (count === 2) return { mark: '△', cls: 'congestion-mid' };
+      return { mark: '×', cls: 'congestion-high' };
+    }
+
+    function renderRegCalendars() {
+      if (registerState.leaveType === 'full') {
+        renderSingleRegCalendar('full-cal-grid', 'reg-cal-month-label', registerState.calYear, registerState.calMonth, registerState.fullDate, (dateStr) => {
+          registerState.fullDate = dateStr;
+          updateRegCalendarSelection();
+          renderSelectedDisplay();
+          renderCongestionWarnings();
+          updateRunningTotal();
+          updateStep2NextBtn();
+        });
+      } else {
+        renderSingleRegCalendar('half1-cal-grid', 'reg-cal-month-label-h1', registerState.calYearH1, registerState.calMonthH1, registerState.half1Date, (dateStr) => {
+          registerState.half1Date = dateStr;
+          updateRegCalendarSelection();
+          renderSelectedDisplay();
+          renderCongestionWarnings();
+          updateRunningTotal();
+          updateStep2NextBtn();
+        });
+        renderSingleRegCalendar('half2-cal-grid', 'reg-cal-month-label-h2', registerState.calYearH2, registerState.calMonthH2, registerState.half2Date, (dateStr) => {
+          registerState.half2Date = dateStr;
+          updateRegCalendarSelection();
+          renderSelectedDisplay();
+          renderCongestionWarnings();
+          updateRunningTotal();
+          updateStep2NextBtn();
+        });
+        // 時間帯ピル
+        updateTimePills();
+      }
+      renderSelectedDisplay();
+      renderCongestionWarnings();
+    }
+
+    function renderSingleRegCalendar(gridId, labelId, year, month, selectedDateStr, onSelect) {
+      const grid = document.getElementById(gridId);
+      const label = document.getElementById(labelId);
+      if (!grid || !label) return;
+      label.textContent = `${year}年${month}月`;
+      grid.innerHTML = '';
+      const staffName = document.getElementById('staff-name').value;
+      const first = new Date(year, month - 1, 1);
+      const lastDay = new Date(year, month, 0).getDate();
+      const startDow = first.getDay();
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      for (let i = 0; i < startDow; i++) {
+        const c = document.createElement('div'); c.className = 'reg-cal-day empty'; grid.appendChild(c);
+      }
+      for (let d = 1; d <= lastDay; d++) {
+        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'reg-cal-day';
+        if (dateStr === todayStr) cell.classList.add('today');
+        if (dateStr === selectedDateStr) cell.classList.add('selected');
+
+        // 混雑度マーク（スタッフ選択済みかつグループ所属の場合のみ）
+        let congestionHtml = '';
+        if (staffName) {
+          const job = getStaffJob(staffName);
+          const group = getJobGroup(job);
+          if (group) {
+            const cnt = getCongestionCount(dateStr, staffName);
+            const m = congestionMark(cnt);
+            congestionHtml = `<span class="congestion-mark ${m.cls}">${m.mark}</span>`;
+          }
+        }
+        cell.innerHTML = `<span class="day-number">${d}</span>${congestionHtml}`;
+        cell.addEventListener('click', () => onSelect(dateStr));
+        grid.appendChild(cell);
+      }
+    }
+
+    function updateRegCalendarSelection() {
+      // セルのselected再付与
+      if (registerState.leaveType === 'full') {
+        document.querySelectorAll('#full-cal-grid .reg-cal-day').forEach(c => c.classList.remove('selected'));
+        const cells = document.querySelectorAll('#full-cal-grid .reg-cal-day:not(.empty)');
+        cells.forEach((c) => {
+          const numEl = c.querySelector('.day-number');
+          if (!numEl) return;
+          const d = parseInt(numEl.textContent);
+          const ds = `${registerState.calYear}-${String(registerState.calMonth).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          if (ds === registerState.fullDate) c.classList.add('selected');
+        });
+      } else {
+        ['half1-cal-grid', 'half2-cal-grid'].forEach((gid, idx) => {
+          const grid = document.getElementById(gid);
+          grid.querySelectorAll('.reg-cal-day').forEach(c => c.classList.remove('selected'));
+          const cells = grid.querySelectorAll('.reg-cal-day:not(.empty)');
+          const year = idx === 0 ? registerState.calYearH1 : registerState.calYearH2;
+          const month = idx === 0 ? registerState.calMonthH1 : registerState.calMonthH2;
+          const target = idx === 0 ? registerState.half1Date : registerState.half2Date;
+          cells.forEach((c) => {
+            const numEl = c.querySelector('.day-number');
+            if (!numEl) return;
+            const d = parseInt(numEl.textContent);
+            const ds = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            if (ds === target) c.classList.add('selected');
+          });
+        });
+      }
+    }
+
+    function updateTimePills() {
+      document.querySelectorAll('.time-pill').forEach(p => {
+        const half = p.dataset.half;
+        const time = p.dataset.time;
+        const cur = half === '1' ? registerState.half1Time : registerState.half2Time;
+        p.classList.toggle('selected', cur === time);
+      });
+    }
+
+    function selectHalfTime(slot, time) {
+      if (slot === 1) registerState.half1Time = time;
+      else registerState.half2Time = time;
+      updateTimePills();
+      renderSelectedDisplay();
+      updateRunningTotal();
+      updateStep2NextBtn();
+    }
+
+    function fmtDate(dateStr) {
+      const parts = dateStr.split('-');
+      const dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      const dow = ['日','月','火','水','木','金','土'][dt.getDay()];
+      return `${parts[1]}/${parts[2]}（${dow}）`;
+    }
+
+    function timeLabel(t) {
+      if (t === 'am') return '午前休（9時〜14時）';
+      if (t === 'pm') return '午後休（13時〜18時）';
+      return '';
+    }
+
+    function renderSelectedDisplay() {
+      const fd = document.getElementById('full-selected-display');
+      const h1 = document.getElementById('half1-selected-display');
+      const h2 = document.getElementById('half2-selected-display');
+      if (fd) fd.innerHTML = '';
+      if (h1) h1.innerHTML = '';
+      if (h2) h2.innerHTML = '';
+      if (registerState.leaveType === 'full' && registerState.fullDate && fd) {
+        fd.innerHTML = `<div class="selected-date-display"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>選択中：${fmtDate(registerState.fullDate)} 全休</div>`;
+      }
+      if (registerState.leaveType === 'half') {
+        if (registerState.half1Date && registerState.half1Time && h1) {
+          h1.innerHTML = `<div class="selected-date-display"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>選択中：${fmtDate(registerState.half1Date)} ${timeLabel(registerState.half1Time)}</div>`;
+        } else if (registerState.half1Date && h1) {
+          h1.innerHTML = `<div class="selected-date-display" style="background:#fff9db;border-color:#ffe066;color:#7c5e0a;">日付：${fmtDate(registerState.half1Date)} → 午前休/午後休を選んでください</div>`;
+        }
+        if (registerState.half2Date && registerState.half2Time && h2) {
+          h2.innerHTML = `<div class="selected-date-display"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>選択中：${fmtDate(registerState.half2Date)} ${timeLabel(registerState.half2Time)}</div>`;
+        } else if (registerState.half2Date && h2) {
+          h2.innerHTML = `<div class="selected-date-display" style="background:#fff9db;border-color:#ffe066;color:#7c5e0a;">日付：${fmtDate(registerState.half2Date)} → 午前休/午後休を選んでください</div>`;
+        }
+      }
+    }
+
+    function renderCongestionWarnings() {
+      const staffName = document.getElementById('staff-name').value;
+      if (!staffName) return;
+      const job = getStaffJob(staffName);
+      const group = getJobGroup(job);
+      const warningHtml = (count) => `
+        <div class="congestion-warning">
+          <div style="color:var(--danger);flex-shrink:0;">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="congestion-warning-title">この日は希望が集中しています</div>
+            <div class="congestion-warning-text">同じ職種グループで${count}名が希望中。承認されない可能性があります。</div>
+          </div>
+        </div>`;
+
+      // 全休警告
+      const fw = document.getElementById('full-warning-area');
+      if (fw) {
+        fw.innerHTML = '';
+        if (group && registerState.fullDate) {
+          const cnt = getCongestionCount(registerState.fullDate, staffName);
+          if (cnt >= 3) fw.innerHTML = warningHtml(cnt);
+        }
+      }
+      // 半休1 警告
+      const h1w = document.getElementById('half1-warning-area');
+      if (h1w) {
+        h1w.innerHTML = '';
+        if (group && registerState.half1Date) {
+          const cnt = getCongestionCount(registerState.half1Date, staffName);
+          if (cnt >= 3) h1w.innerHTML = warningHtml(cnt);
+        }
+      }
+      // 半休2 警告
+      const h2w = document.getElementById('half2-warning-area');
+      if (h2w) {
+        h2w.innerHTML = '';
+        if (group && registerState.half2Date) {
+          const cnt = getCongestionCount(registerState.half2Date, staffName);
+          if (cnt >= 3) h2w.innerHTML = warningHtml(cnt);
+        }
+      }
+    }
+
+    function calcTotalDays() {
+      if (registerState.leaveType === 'full') {
+        return registerState.fullDate ? 1.0 : 0;
+      } else if (registerState.leaveType === 'half') {
+        let t = 0;
+        if (registerState.half1Date && registerState.half1Time) t += 0.5;
+        if (registerState.half2Date && registerState.half2Time) t += 0.5;
+        return t;
+      }
+      return 0;
+    }
+
+    function updateRunningTotal() {
+      const v = calcTotalDays();
+      const el = document.getElementById('running-total-value');
+      if (el) el.textContent = v.toFixed(1) + '日';
+    }
+
+    function updateStep2NextBtn() {
+      const btn = document.getElementById('step2-next-btn');
+      if (!btn) return;
+      let valid = false;
+      if (registerState.leaveType === 'full') {
+        valid = !!registerState.fullDate;
+      } else if (registerState.leaveType === 'half') {
+        valid = registerState.half1Date && registerState.half1Time && registerState.half2Date && registerState.half2Time && registerState.half1Date !== registerState.half2Date;
+      }
+      btn.disabled = !valid;
+      btn.style.opacity = valid ? '1' : '0.5';
+    }
+
+    function renderConfirmArea() {
+      const area = document.getElementById('confirm-area');
+      const staffName = document.getElementById('staff-name').value;
+      const job = getStaffJob(staffName);
+      const store = getStaffStore(staffName);
+      const jc = getJobColor(job);
+      const sc = getStoreColor(store);
+
+      let rowsHtml = '';
+      if (registerState.leaveType === 'full') {
+        rowsHtml = `<div class="summary-row"><span class="date-part">${fmtDate(registerState.fullDate)}</span><span class="type-part">全休</span></div>`;
+      } else {
+        rowsHtml = `
+          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half1Date)}</span><span class="type-part">${timeLabel(registerState.half1Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
+          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half2Date)}</span><span class="type-part">${timeLabel(registerState.half2Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
+        `;
+      }
+
+      area.innerHTML = `
+        <div class="summary-card">
+          <div class="summary-staff-block">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="inline-block w-3 h-3 rounded-full" style="background:${staffColor(staffName)}"></span>
+              <span style="font-weight:700;font-size:15px;">${esc(staffName)}</span>
+              <span style="font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;background:${jc};">${esc(job)}</span>
+              <span style="font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;background:${sc};">${esc(store)}</span>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:var(--radius);padding:6px 14px;">
+            ${rowsHtml}
+            <div class="summary-total">
+              <span>合計</span>
+              <span class="summary-total-value">${calcTotalDays().toFixed(1)}日</span>
+            </div>
+          </div>
+        </div>
+        <div class="info-box info-box-gray" style="font-size:12.5px;color:var(--gray-700);">
+          内容に問題がなければ「この内容で申請する」をタップしてください。修正がある場合は「戻って修正する」から変更できます。
+        </div>
+      `;
+    }
+
+    function renderFinalArea() {
+      // STEP4 = 確認カード再表示 + 申請ボタン
+      const area = document.getElementById('final-area');
+      const staffName = document.getElementById('staff-name').value;
+      const job = getStaffJob(staffName);
+      const store = getStaffStore(staffName);
+      const jc = getJobColor(job);
+      const sc = getStoreColor(store);
+
+      let rowsHtml = '';
+      if (registerState.leaveType === 'full') {
+        rowsHtml = `<div class="summary-row"><span class="date-part">${fmtDate(registerState.fullDate)}</span><span class="type-part">全休</span></div>`;
+      } else {
+        rowsHtml = `
+          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half1Date)}</span><span class="type-part">${timeLabel(registerState.half1Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
+          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half2Date)}</span><span class="type-part">${timeLabel(registerState.half2Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
+        `;
+      }
+
+      area.innerHTML = `
+        <div class="summary-card">
+          <div class="summary-staff-block">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span class="inline-block w-3 h-3 rounded-full" style="background:${staffColor(staffName)}"></span>
+              <span style="font-weight:700;font-size:15px;">${esc(staffName)}</span>
+              <span style="font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;background:${jc};">${esc(job)}</span>
+              <span style="font-size:11px;padding:2px 8px;border-radius:999px;color:#fff;background:${sc};">${esc(store)}</span>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:var(--radius);padding:6px 14px;">
+            ${rowsHtml}
+            <div class="summary-total">
+              <span>合計</span>
+              <span class="summary-total-value">${calcTotalDays().toFixed(1)}日</span>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center;font-size:13px;color:var(--gray-600);margin-top:14px;">下の「申請する」ボタンで送信されます</p>
+      `;
+    }
+
+    async function submitRequest() {
+      const submitBtn = document.getElementById('submit-btn');
+      const staffName = document.getElementById('staff-name').value;
+      if (!staffName) { showToast('スタッフが選択されていません', true); return; }
+
+      // 送信データ構築
+      const dates = [];
+      if (registerState.leaveType === 'full') {
+        dates.push({ date: registerState.fullDate, type: '全休' });
+      } else {
+        dates.push({ date: registerState.half1Date, type: timeLabel(registerState.half1Time) });
+        dates.push({ date: registerState.half2Date, type: timeLabel(registerState.half2Time) });
+      }
+
+      // 重複チェック
+      for (const d of dates) {
+        if (requestRecords.some(rec => rec.staff_name === staffName && rec.request_date === d.date && rec.leave_type === d.type)) {
+          const dateFormatted = new Date(d.date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
+          showToast(`${staffName}さんの${dateFormatted}（${d.type}）は既に登録されています`, true);
+          return;
+        }
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.textContent = '送信中...';
+
+      const ts = new Date().toISOString();
+      let ok = true;
+      for (const d of dates) {
+        const res = await window.dataSdk.create({
+          record_type: 'request',
+          staff_name: staffName,
+          request_date: d.date,
+          priority: 1, // 第1希望固定
+          reason: '',
+          created_at: ts,
+          job_type_name: '',
+          store_name: '',
+          staff_job: '',
+          staff_store: '',
+          leave_type: d.type
+        });
+        if (!res.isOk) ok = false;
+      }
+
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.textContent = '申請する';
+
+      if (ok) {
+        // 状態リセット
+        resetRegisterState();
+        showSuccessAnimation();
+        setTimeout(() => showToast('申請しました'), 1500);
+      } else {
+        showToast('エラーが発生しました', true);
+      }
+    }
+
+    function resetRegisterState() {
+      registerState.step = 1;
+      registerState.leaveType = null;
+      registerState.fullDate = null;
+      registerState.half1Date = null;
+      registerState.half1Time = null;
+      registerState.half2Date = null;
+      registerState.half2Time = null;
+      initRegisterCalendars();
+      document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('selected'));
+      const staffSel = document.getElementById('staff-name'); if (staffSel) staffSel.value = '';
+      const n1 = document.getElementById('step1-next-btn'); if (n1) { n1.disabled = true; n1.style.opacity = '0.5'; }
+      const n2 = document.getElementById('step2-next-btn'); if (n2) { n2.disabled = true; n2.style.opacity = '0.5'; }
+      ['step1','step2','step3','step4'].forEach((s, i) => {
+        document.getElementById(s + '-content').classList.toggle('hidden', i !== 0);
+      });
+      renderStepProgress();
+    }
+
+    function showSuccessAnimation() {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeInOut 1.5s ease forwards;';
+
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'width:120px;height:120px;position:relative;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;';
+
+      const circle = document.createElement('div');
+      circle.style.cssText = 'width:120px;height:120px;border-radius:50%;background:#22c55e;position:absolute;top:0;left:0;';
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 52 52');
+      svg.style.cssText = 'position:absolute;top:0;left:0;width:120px;height:120px;z-index:1;';
+
+      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      poly.setAttribute('points', '14,27 22,35 38,18');
+      poly.setAttribute('stroke', 'white');
+      poly.setAttribute('stroke-width', '3.5');
+      poly.setAttribute('fill', 'none');
+      poly.setAttribute('stroke-linecap', 'round');
+      poly.setAttribute('stroke-linejoin', 'round');
+      poly.style.cssText = 'stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck 0.4s ease 0.3s forwards;';
+
+      svg.appendChild(poly);
+      wrap.appendChild(circle);
+      wrap.appendChild(svg);
+      overlay.appendChild(wrap);
+      document.body.appendChild(overlay);
+
+      setTimeout(() => { overlay.remove(); }, 1500);
     }
 
     function renderRegisterJobFilterButtons() {
@@ -960,6 +2102,10 @@
         btn.addEventListener('click', () => { registerStoreFilter = f.value; renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); }); c.appendChild(btn);
       });
     }
+
+    // ============================================
+    // 既存のカレンダー/ステータス/スタッフ管理タブ
+    // ============================================
     function renderJobFilterButtons() {
       const c = document.getElementById('job-filter-buttons'); c.innerHTML = '';
       [{value:'all',label:'全表示'}, ...getJobTypes().map(j => ({value:j,label:j}))].forEach(f => {
@@ -967,7 +2113,7 @@
         btn.className = activeJobFilters.includes(f.value) ? 'filter-btn active-primary' : 'filter-btn';
         btn.addEventListener('click', () => {
           if (f.value === 'all') { activeJobFilters = ['all']; } else { activeJobFilters = activeJobFilters.filter(v => v !== 'all'); activeJobFilters.includes(f.value) ? activeJobFilters = activeJobFilters.filter(v => v !== f.value) : activeJobFilters.push(f.value); if (!activeJobFilters.length) activeJobFilters = ['all']; }
-          renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderPriorityFilterButtons(); renderCalendar();
+          renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderCalendar();
         }); c.appendChild(btn);
       });
     }
@@ -978,20 +2124,12 @@
         btn.className = activeStoreFilters.includes(f.value) ? 'filter-btn active-teal' : 'filter-btn';
         btn.addEventListener('click', () => {
           if (f.value === 'all') { activeStoreFilters = ['all']; } else { activeStoreFilters = activeStoreFilters.filter(v => v !== 'all'); activeStoreFilters.includes(f.value) ? activeStoreFilters = activeStoreFilters.filter(v => v !== f.value) : activeStoreFilters.push(f.value); if (!activeStoreFilters.length) activeStoreFilters = ['all']; }
-          renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderPriorityFilterButtons(); renderCalendar();
+          renderJobFilterButtons(); renderStoreFilterButtons(); renderStaffFilterButtons(); renderCalendar();
         }); c.appendChild(btn);
       });
     }
     function renderPriorityFilterButtons() {
-      const c = document.getElementById('priority-filter-buttons'); c.innerHTML = '';
-      [{value:'all',label:'全表示'},{value:1,label:'第1希望'},{value:2,label:'第2希望'},{value:3,label:'第3希望'}].forEach(opt => {
-        const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = opt.label;
-        btn.className = activePriorityFilters.includes(opt.value) ? 'filter-btn active-primary' : 'filter-btn';
-        btn.addEventListener('click', () => {
-          if (opt.value === 'all') { activePriorityFilters = ['all']; } else { activePriorityFilters = activePriorityFilters.filter(v => v !== 'all'); activePriorityFilters.includes(opt.value) ? activePriorityFilters = activePriorityFilters.filter(v => v !== opt.value) : activePriorityFilters.push(opt.value); if (!activePriorityFilters.length) activePriorityFilters = ['all']; }
-          renderPriorityFilterButtons(); renderCalendar();
-        }); c.appendChild(btn);
-      });
+      // 希望順位フィルターは廃止（関数は no-op として残す）
     }
     function renderConfirmedFilterButtons() {
       const c = document.getElementById('confirmed-filter-buttons'); c.innerHTML = '';
@@ -1047,99 +2185,6 @@
       return d;
     }
 
-    async function handleSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('staff-name').value;
-      const d1 = document.getElementById('date1').value, d2 = document.getElementById('date2').value, d3 = document.getElementById('date3').value;
-      const t1 = document.getElementById('type1').value, t2 = document.getElementById('type2').value, t3 = document.getElementById('type3').value;
-      let valid = true;
-      document.getElementById('err-name').classList.toggle('hidden', !!name); if (!name) valid = false;
-      if (!d1 && !d2 && !d3) { showToast('少なくとも1つの希望日を入力してください', true); return; }
-      if (d1 && !validateDateMonth(1)) valid = false;
-      if (d2 && !validateDateMonth(2)) valid = false;
-      if (d3 && !validateDateMonth(3)) valid = false;
-      if (document.getElementById('complement1-date').value && !validateDateMonth('complement1')) valid = false;
-      if (document.getElementById('complement2-date').value && !validateDateMonth('complement2')) valid = false;
-      if (document.getElementById('complement3-date').value && !validateDateMonth('complement3')) valid = false;
-      if (!valid) return;
-
-      const priorityGroups = { 1: [], 2: [], 3: [] };
-      if (d1) { priorityGroups[1].push({date: d1, type: t1, priority: 1}); if (t1 !== '全休') { const cd = document.getElementById('complement1-date').value; if (cd) priorityGroups[1].push({date: cd, type: document.getElementById('complement1-type').value, priority: 1}); } }
-      if (d2) { priorityGroups[2].push({date: d2, type: t2, priority: 2}); if (t2 !== '全休') { const cd = document.getElementById('complement2-date').value; if (cd) priorityGroups[2].push({date: cd, type: document.getElementById('complement2-type').value, priority: 2}); } }
-      if (d3) { priorityGroups[3].push({date: d3, type: t3, priority: 3}); if (t3 !== '全休') { const cd = document.getElementById('complement3-date').value; if (cd) priorityGroups[3].push({date: cd, type: document.getElementById('complement3-type').value, priority: 3}); } }
-
-      for (const [priority, pDates] of Object.entries(priorityGroups)) {
-        if (!pDates.length) continue;
-        const prefix = `${targetYear}-${String(targetMonth).padStart(2,'0')}`;
-        if (requestRecords.some(rec => rec.staff_name === name && rec.priority === parseInt(priority) && rec.request_date && rec.request_date.startsWith(prefix))) { showToast(`${name}さんの第${priority}希望は既に登録されています`, true); return; }
-        const newVal = pDates.reduce((s, d) => s + getLeaveValue(d.type), 0);
-        if (newVal > 1.0) { showToast(`第${priority}希望の上限（1日分）を超えています`, true); return; }
-      }
-
-      const dates = Object.values(priorityGroups).flat();
-      for (const d of dates) {
-        if (requestRecords.some(rec => rec.staff_name === name && rec.request_date === d.date && rec.leave_type === d.type)) {
-          const dateFormatted = new Date(d.date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
-          showToast(`${name}さんの${dateFormatted}（${d.type}）は既に登録されています`, true); return;
-        }
-      }
-
-      const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.style.opacity = '0.5';
-      const ts = new Date().toISOString(); let ok = true;
-      for (const d of dates) {
-        const res = await window.dataSdk.create({ record_type: 'request', staff_name: name, request_date: d.date, priority: d.priority, reason: '', created_at: ts, job_type_name: '', store_name: '', staff_job: '', staff_store: '', leave_type: d.type });
-        if (!res.isOk) ok = false;
-      }
-      btn.disabled = false; btn.style.opacity = '1';
-      if (ok) {
-        e.target.reset(); priority2Open = false; priority3Open = false;
-        document.getElementById('priority2-section').classList.add('hidden');
-        document.getElementById('priority3-section').classList.add('hidden');
-        document.getElementById('complement1-section').classList.add('hidden');
-        populateStaffSelect(); showSuccessAnimation(); setTimeout(() => showToast('登録しました'), 1500);
-      } else showToast('エラーが発生しました', true);
-    }
-
-    function showSuccessAnimation() {
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes fadeInOut { 0%{opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{opacity:0} }
-        @keyframes popIn { 0%{transform:scale(0)} 60%{transform:scale(1.1)} 100%{transform:scale(1)} }
-        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
-      `;
-      document.head.appendChild(style);
-
-      const overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.95);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeInOut 1.5s ease forwards;';
-
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'width:120px;height:120px;position:relative;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;';
-
-      const circle = document.createElement('div');
-      circle.style.cssText = 'width:120px;height:120px;border-radius:50%;background:#22c55e;position:absolute;top:0;left:0;';
-
-      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      svg.setAttribute('viewBox', '0 0 52 52');
-      svg.style.cssText = 'position:absolute;top:0;left:0;width:120px;height:120px;z-index:1;';
-
-      const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-      poly.setAttribute('points', '14,27 22,35 38,18');
-      poly.setAttribute('stroke', 'white');
-      poly.setAttribute('stroke-width', '3.5');
-      poly.setAttribute('fill', 'none');
-      poly.setAttribute('stroke-linecap', 'round');
-      poly.setAttribute('stroke-linejoin', 'round');
-      poly.style.cssText = 'stroke-dasharray:40;stroke-dashoffset:40;animation:drawCheck 0.4s ease 0.3s forwards;';
-
-      svg.appendChild(poly);
-      wrap.appendChild(circle);
-      wrap.appendChild(svg);
-      overlay.appendChild(wrap);
-      document.body.appendChild(overlay);
-
-      setTimeout(() => { overlay.remove(); style.remove(); }, 1500);
-    }
-
     function changeMonth(d) { currentMonth += d; if (currentMonth > 11) { currentMonth = 0; currentYear++; } if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
 
     function renderCalendar() {
@@ -1159,8 +2204,7 @@
           const badges = document.createElement('div'); badges.className = 'flex flex-wrap gap-0.5 mt-0.5';
           dayReqs.slice(0,3).forEach(r => {
             const b = document.createElement('span'); b.className = 'badge text-white inline-flex items-center text-xs' + (isConfirmed(r) ? ' badge-confirmed' : '');
-            b.style.background = staffColor(r.staff_name); b.textContent = r.staff_name.charAt(0);
-            const num = document.createElement('span'); num.className = 'priority-num opacity-80'; num.textContent = PRIORITY_LABELS[r.priority] || ''; b.appendChild(num);
+            b.style.background = staffColor(r.staff_name); b.textContent = r.staff_name.substring(0, 2);
             const ta = document.createElement('span'); ta.className = 'priority-num opacity-80'; ta.textContent = LEAVE_TYPE_ABBR[r.leave_type] || ''; b.appendChild(ta);
             badges.appendChild(b);
           });
@@ -1211,7 +2255,7 @@
         const row = document.createElement('div'); row.className = 'detail-row'; row.style.cssText = 'display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:13px;';
         const job = getStaffJob(r.staff_name); const jc = getJobColor(job); const store = getStaffStore(r.staff_name); const sc = getStoreColor(store); const confirmed = isConfirmed(r);
         const createdDate = r.created_at ? new Date(r.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
-        row.innerHTML = `<span class="inline-block w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0" style="background:${staffColor(r.staff_name)}"></span>${r.priority ? `<span class="text-indigo-500 font-semibold mr-2">第${Math.floor(r.priority)}希望</span>` : ''}<span class="font-medium">${esc(r.staff_name)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${jc}">${esc(job)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${sc}">${esc(store)}</span>${r.leave_type ? `<span class="text-gray-500 font-medium mr-2">${esc(r.leave_type)}</span>` : ''}${confirmed ? '<span class="text-green-600 font-semibold text-xs ml-1">✓ 確定</span>' : ''}<span class="w-full"></span>${createdDate ? `<span class="text-gray-400 text-xs">登録日：${createdDate}</span>` : ''}`;
+        row.innerHTML = `<span class="inline-block w-2.5 h-2.5 rounded-full mr-2 flex-shrink-0" style="background:${staffColor(r.staff_name)}"></span><span class="font-medium">${esc(r.staff_name)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${jc}">${esc(job)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${sc}">${esc(store)}</span>${r.leave_type ? `<span class="text-gray-500 font-medium mr-2">${esc(r.leave_type)}</span>` : ''}${confirmed ? '<span class="text-green-600 font-semibold text-xs ml-1">✓ 確定</span>' : ''}<span class="w-full"></span>${createdDate ? `<span class="text-gray-400 text-xs">登録日：${createdDate}</span>` : ''}`;
         const actDiv = document.createElement('div'); actDiv.className = 'ml-auto flex gap-1';
         if (!confirmed) {
           const cb = document.createElement('button'); cb.className = 'btn-success-outline'; cb.textContent = '確定';
@@ -1252,7 +2296,7 @@
         const job = getStaffJob(r.staff_name); const jc = getJobColor(job); const store = getStaffStore(r.staff_name); const sc = getStoreColor(store); const confirmed = isConfirmed(r);
         const createdDate = r.created_at ? new Date(r.created_at).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '';
         const info = document.createElement('div'); info.className = 'flex items-center gap-2 text-sm flex-wrap';
-        info.innerHTML = `<span class="font-mono text-gray-500">${r.request_date}</span><span class="font-medium">${esc(r.staff_name)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${jc}">${esc(job)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${sc}">${esc(store)}</span><span class="text-indigo-500 font-medium">${r.priority ? `第${Math.floor(r.priority)}希望` : ''}</span><span class="text-gray-500">${r.leave_type||''}</span>${confirmed ? '<span class="text-green-600 font-semibold text-xs">✓ 確定</span>' : ''}<span class="w-full"></span>${createdDate ? `<span class="text-gray-400 text-xs">登録日：${createdDate}</span>` : ''}`;
+        info.innerHTML = `<span class="font-mono text-gray-500">${r.request_date}</span><span class="font-medium">${esc(r.staff_name)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${jc}">${esc(job)}</span><span class="text-xs px-1 py-0.5 rounded text-white" style="background:${sc}">${esc(store)}</span><span class="text-gray-500">${r.leave_type||''}</span>${confirmed ? '<span class="text-green-600 font-semibold text-xs">✓ 確定</span>' : ''}<span class="w-full"></span>${createdDate ? `<span class="text-gray-400 text-xs">登録日：${createdDate}</span>` : ''}`;
         const actions = document.createElement('div'); actions.className = 'flex items-center gap-1';
         if (!confirmed) {
           const cb = document.createElement('button'); cb.className = 'btn-success-outline'; cb.textContent = '確定';
@@ -1274,26 +2318,6 @@
         actions.appendChild(delBtn); row.appendChild(info); row.appendChild(actions); list.appendChild(row);
       });
       lucide.createIcons();
-    }
-
-    function openBulkDeleteModal() {
-      const prefix = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`;
-      const monthAllData = requestRecords.filter(r => r.request_date && r.request_date.startsWith(prefix));
-      const staffMap = {}; monthAllData.forEach(r => { if (!staffMap[r.staff_name]) staffMap[r.staff_name] = []; staffMap[r.staff_name].push(r); });
-      const targetStaff = [];
-      Object.entries(staffMap).forEach(([name, records]) => { if (records.some(r => isConfirmed(r))) { const uc = records.filter(r => !isConfirmed(r)).length; if (uc > 0) targetStaff.push({ name, unconfirmedCount: uc }); } });
-      if (!targetStaff.length) { showToast('対象のスタッフがいません'); return; }
-      bulkDeleteModalState = { staffList: targetStaff, monthData: staffMap };
-      const c = document.getElementById('bulk-delete-staff-list'); c.innerHTML = '';
-      targetStaff.forEach(item => { const div = document.createElement('div'); div.className = 'text-sm text-gray-700 py-2 border-b border-gray-200 last:border-0'; div.innerHTML = `<span class="font-medium">${esc(item.name)}</span> <span class="text-gray-500">（未確定：${item.unconfirmedCount}件）</span>`; c.appendChild(div); });
-      document.getElementById('bulk-delete-modal').classList.remove('hidden');
-    }
-    function closeBulkDeleteModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('bulk-delete-modal').classList.add('hidden'); bulkDeleteModalState = null; }
-    async function confirmBulkDelete() {
-      if (!bulkDeleteModalState) return;
-      let deletedCount = 0;
-      for (const staff of bulkDeleteModalState.staffList) { for (const rec of bulkDeleteModalState.monthData[staff.name].filter(r => !isConfirmed(r))) { const res = await window.dataSdk.delete(rec); if (res.isOk) deletedCount++; } }
-      closeBulkDeleteModal(); showToast(`${deletedCount}件の未確定記録を削除しました`);
     }
 
     function showDetailDeleteConfirm(actionsDiv, record) {
@@ -1338,25 +2362,61 @@
       let sl = getStaffList().sort((a, b) => a.name.localeCompare(b.name, 'ja'));
       if (statusJobFilter !== 'all') sl = sl.filter(s => s.job === statusJobFilter);
       if (statusStoreFilter !== 'all') sl = sl.filter(s => s.store === statusStoreFilter);
-      const noStaffEl = document.getElementById('status-no-staff'); const table = document.getElementById('status-table');
-      if (!sl.length) { noStaffEl.classList.remove('hidden'); table.classList.add('hidden'); } else { noStaffEl.classList.add('hidden'); table.classList.remove('hidden'); }
-      const tbody = document.getElementById('status-tbody'); tbody.innerHTML = '';
-      let doneCount = 0, notDoneCount = 0;
+      const noStaffEl = document.getElementById('status-no-staff'); const cardList = document.getElementById('status-card-list');
+      if (!sl.length) { noStaffEl.classList.remove('hidden'); cardList.classList.add('hidden'); } else { noStaffEl.classList.add('hidden'); cardList.classList.remove('hidden'); }
+      cardList.innerHTML = '';
+      const periodStr = `${statusYear}-${String(statusMonth+1).padStart(2,'0')}`;
+      let doneCount = 0, notDoneCount = 0, verifiedCount = 0;
       sl.forEach(s => {
         const records = monthData.filter(r => r.staff_name === s.name); const confirmedRecords = records.filter(r => isConfirmed(r));
         const confirmedDays = confirmedRecords.reduce((sum, r) => sum + getLeaveValue(r.leave_type), 0); const hasAny = records.length > 0;
-        let statusText, statusClass;
-        if (confirmedDays >= 1.0) { statusText = '✅ 消化済み'; statusClass = 'text-green-600 font-semibold'; doneCount++; }
-        else if (confirmedDays > 0) { statusText = '⚠️ 一部確定'; statusClass = 'text-yellow-600 font-semibold'; notDoneCount++; }
-        else if (hasAny) { statusText = '🔵 申請中'; statusClass = 'text-blue-600 font-semibold'; notDoneCount++; }
-        else { statusText = '❌ 未申請'; statusClass = 'text-red-500 font-semibold'; notDoneCount++; }
+        let statusText, statusCls;
+        if (confirmedDays >= 1.0) { statusText = '✓ 消化済み'; statusCls = 'status-done'; doneCount++; }
+        else if (confirmedDays > 0) { statusText = '⚠ 一部確定'; statusCls = 'status-partial'; notDoneCount++; }
+        else if (hasAny) { statusText = '○ 申請中'; statusCls = 'status-applied'; notDoneCount++; }
+        else { statusText = '✕ 未申請'; statusCls = 'status-not-applied'; notDoneCount++; }
         const jc = getJobColor(s.job); const sc = getStoreColor(s.store);
-        const confirmedDatesText = confirmedRecords.length ? confirmedRecords.map(r => { const date = new Date(r.request_date + 'T00:00:00'); return `${date.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })} ${LEAVE_TYPE_PRINT[r.leave_type] || r.leave_type || ''}`.trim(); }).join('<br>') : '−';
-        const tr = document.createElement('tr'); tr.className = 'border-b border-gray-100';
-        tr.innerHTML = `<td class="py-2 px-2 font-medium">${esc(s.name)}</td><td class="py-2 px-2"><span class="text-xs px-1.5 py-0.5 rounded text-white" style="background:${jc}">${esc(s.job)}</span></td><td class="py-2 px-2"><span class="text-xs px-1.5 py-0.5 rounded text-white" style="background:${sc}">${esc(s.store)}</span></td><td class="py-2 px-2 text-center">${confirmedDays}日</td><td class="py-2 px-2 text-sm text-gray-700">${confirmedDatesText}</td><td class="py-2 px-2 text-center ${statusClass}">${statusText}</td>`;
-        tbody.appendChild(tr);
+        const confirmedDatesHtml = confirmedRecords.length
+          ? confirmedRecords.map(r => {
+              const date = new Date(r.request_date + 'T00:00:00');
+              return `${date.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })} ${LEAVE_TYPE_PRINT[r.leave_type] || r.leave_type || ''}`.trim();
+            }).join(' / ')
+          : '<span class="status-card-dates-empty">確定済みの希望休はありません</span>';
+
+        const verified = isVerified(s.name, periodStr);
+        if (verified) verifiedCount++;
+        const verifyBtnHtml = verified
+          ? `<button type="button" class="verify-btn verified" data-staff="${esc(s.name)}"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>勤怠と照合済み</button>`
+          : `<button type="button" class="verify-btn" data-staff="${esc(s.name)}">勤怠との照合をする</button>`;
+
+        const card = document.createElement('div'); card.className = 'status-card';
+        card.innerHTML = `
+          <div class="status-card-row1">
+            <div class="status-card-name">
+              <span class="inline-block w-2.5 h-2.5 rounded-full" style="background:${staffColor(s.name)}"></span>
+              <span>${esc(s.name)}</span>
+            </div>
+            <span class="status-card-status ${statusCls}">${statusText}</span>
+          </div>
+          <div class="status-card-tags">
+            <span class="status-card-tag" style="background:${jc}">${esc(s.job)}</span>
+            <span class="status-card-tag" style="background:${sc}">${esc(s.store)}</span>
+          </div>
+          <div class="status-card-row2">
+            <span class="status-card-days">確定済み <span class="status-card-days-value">${confirmedDays}</span> 日</span>
+          </div>
+          <div class="status-card-dates">${confirmedDatesHtml}</div>
+          <div class="verify-row">${verifyBtnHtml}</div>
+        `;
+        const vBtn = card.querySelector('.verify-btn');
+        vBtn.addEventListener('click', async () => {
+          vBtn.disabled = true; vBtn.style.opacity = '0.6';
+          await toggleVerification(s.name, statusYear, statusMonth + 1);
+          // re-render happens via onDataChanged
+        });
+        cardList.appendChild(card);
       });
-      document.getElementById('status-summary').innerHTML = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-medium">消化済み ${doneCount}人</span><span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-sm font-medium">未完了 ${notDoneCount}人</span>`;
+      document.getElementById('status-summary').innerHTML = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-medium">消化済み ${doneCount}人</span><span class="bg-orange-100 text-orange-700 px-3 py-1 rounded-lg text-sm font-medium">未完了 ${notDoneCount}人</span><span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium">照合済み ${verifiedCount}人</span>`;
     }
 
     function openPrintPreview() {
@@ -1393,7 +2453,11 @@
     const handler = {
       onDataChanged(data) {
         allRawData = data; classifyData(); refreshAllSelects(); staffFilterPanelInitialized = false;
-        if (!document.getElementById('view-register').classList.contains('hidden')) { populateStaffSelect(); updateRegisterGuide(); }
+        if (!document.getElementById('view-register').classList.contains('hidden')) {
+          populateStaffSelect(); updateRegisterGuide();
+          // STEP2 表示中ならカレンダー再描画（混雑度反映）
+          if (registerState.step === 2) renderRegCalendars();
+        }
         if (!document.getElementById('view-calendar').classList.contains('hidden')) { renderStaffFilterButtons(); calendarSwipeAttached = false; renderCalendar(); }
         if (!document.getElementById('view-status').classList.contains('hidden')) renderStatusView();
         if (!document.getElementById('view-staff').classList.contains('hidden')) renderStaffList();
@@ -1401,7 +2465,10 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      document.getElementById('form-heading-text').textContent = `${targetMonth}月 希望休を登録`;
+      document.getElementById('form-heading-text').textContent = `${targetMonth}月 希望休を申請`;
+      document.getElementById('form-subtitle-text').textContent = `${targetYear}年${targetMonth}月分の希望休を4ステップで登録します`;
+      initRegisterCalendars();
+      renderStepProgress();
       refreshAllSelects(); populateStaffSelect(); updateRegisterGuide(); lucide.createIcons();
       await window.dataSdk.init(handler);
       document.getElementById('loading-overlay').style.display = 'none';
