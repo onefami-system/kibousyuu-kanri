@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>希望休管理ツール</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
@@ -38,6 +38,17 @@
     }
 
     * { box-sizing: border-box; }
+
+    /* Prevent double-tap zoom on interactive elements (mobile) */
+    button, a, input, select, textarea,
+    .cal-day, .reg-cal-day, .type-card, .time-pill,
+    .filter-btn, .verify-btn, .staff-row, .detail-row {
+      touch-action: manipulation;
+    }
+    /* Calendar grid: allow vertical scrolling but handle horizontal ourselves */
+    #calendar-grid, .reg-cal-grid {
+      touch-action: pan-y;
+    }
 
     body {
       font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
@@ -978,9 +989,9 @@
         </div>
       </div>
       <div class="flex items-center justify-between mb-3">
-        <button onclick="changeMonth(-1)" class="p-2 rounded hover:bg-gray-200"><i data-lucide="chevron-left" style="width:20px;height:20px"></i></button>
+        <button onclick="changeMonth(-1)" class="rounded hover:bg-gray-200" style="padding:10px 16px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="chevron-left" style="width:22px;height:22px"></i></button>
         <span id="month-label" class="font-semibold text-lg"></span>
-        <button onclick="changeMonth(1)" class="p-2 rounded hover:bg-gray-200"><i data-lucide="chevron-right" style="width:20px;height:20px"></i></button>
+        <button onclick="changeMonth(1)" class="rounded hover:bg-gray-200" style="padding:10px 16px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="chevron-right" style="width:22px;height:22px"></i></button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:12px;font-weight:700;color:var(--gray-500);margin-bottom:6px;letter-spacing:0.05em;">
         <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
@@ -1005,9 +1016,9 @@
     <section id="view-status" class="hidden">
       <h2 style="font-size:20px;font-weight:800;color:var(--gray-900);margin-bottom:20px;letter-spacing:-0.02em;">ステータス一覧</h2>
       <div class="flex items-center justify-between mb-4">
-        <button onclick="changeStatusMonth(-1)" class="p-2 rounded hover:bg-gray-200"><i data-lucide="chevron-left" style="width:20px;height:20px"></i></button>
+        <button onclick="changeStatusMonth(-1)" class="rounded hover:bg-gray-200" style="padding:10px 16px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="chevron-left" style="width:22px;height:22px"></i></button>
         <span id="status-month-label" class="font-semibold text-lg"></span>
-        <button onclick="changeStatusMonth(1)" class="p-2 rounded hover:bg-gray-200"><i data-lucide="chevron-right" style="width:20px;height:20px"></i></button>
+        <button onclick="changeStatusMonth(1)" class="rounded hover:bg-gray-200" style="padding:10px 16px;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;"><i data-lucide="chevron-right" style="width:22px;height:22px"></i></button>
       </div>
       <div class="mb-4"><div id="status-job-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
       <div class="mb-4"><div id="status-store-filter-buttons" class="flex gap-2 flex-wrap"></div></div>
@@ -1100,12 +1111,75 @@
     </div>
   </div>
 
+  <!-- Admin Password Modal -->
+  <div id="admin-password-modal" class="hidden">
+    <div class="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center p-4" onclick="closeAdminPasswordModal(event)">
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full" onclick="event.stopPropagation()">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h3 class="font-bold text-lg text-gray-800">🔒 管理者パスワード</h3>
+        </div>
+        <div class="px-6 py-4">
+          <p class="text-gray-700 mb-3 text-sm">削除操作には管理者パスワードが必要です。</p>
+          <input id="admin-password-input" type="password" autocomplete="off" placeholder="パスワードを入力" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+          <p id="admin-password-error" class="text-red-500 text-sm mt-2 hidden">パスワードが違います</p>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-200 flex gap-2 justify-end">
+          <button type="button" class="btn btn-secondary" onclick="closeAdminPasswordModal()">キャンセル</button>
+          <button type="button" class="btn btn-primary" onclick="submitAdminPassword()">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // =============================================
     // ★ ここにウェブアプリのURLを貼り付けてください ★
     // =============================================
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbyO3uXuKSQC9NYLfMCj_ChMMk4QQnlPLWn0Z1Pnsl9JJ7crM-gHaljGVIiX0GPKtV4Ttg/exec';
     // =============================================
+
+    // =============================================
+    // ★ 管理者パスワード（必ず変更してください） ★
+    // =============================================
+    const ADMIN_PASSWORD = 'onefami0901';
+    // =============================================
+
+    // 管理者パスワード認証
+    let _adminPasswordResolve = null;
+    function requireAdminPassword() {
+      return new Promise((resolve) => {
+        _adminPasswordResolve = resolve;
+        const modal = document.getElementById('admin-password-modal');
+        const input = document.getElementById('admin-password-input');
+        const errorEl = document.getElementById('admin-password-error');
+        input.value = '';
+        errorEl.classList.add('hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => input.focus(), 50);
+      });
+    }
+    function submitAdminPassword() {
+      const input = document.getElementById('admin-password-input');
+      const errorEl = document.getElementById('admin-password-error');
+      if (input.value === ADMIN_PASSWORD) {
+        document.getElementById('admin-password-modal').classList.add('hidden');
+        if (_adminPasswordResolve) { _adminPasswordResolve(true); _adminPasswordResolve = null; }
+      } else {
+        errorEl.classList.remove('hidden');
+        input.select();
+      }
+    }
+    function closeAdminPasswordModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('admin-password-modal').classList.add('hidden');
+      if (_adminPasswordResolve) { _adminPasswordResolve(false); _adminPasswordResolve = null; }
+    }
+    // Enterキーで送信、Escでキャンセル
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('admin-password-modal').classList.contains('hidden')) return;
+      if (e.key === 'Enter') { e.preventDefault(); submitAdminPassword(); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeAdminPasswordModal(); }
+    });
 
     // Google Apps Script API
     async function gasRequest(params) {
@@ -1323,6 +1397,7 @@
     }
     async function deleteJobType(job, rec) {
       if (getStaffList().some(s => s.job === job)) { showToast('この職種を使用中のスタッフがいるため削除できません', true); return; }
+      if (!(await requireAdminPassword())) return;
       const res = await window.dataSdk.delete(rec);
       if (!res.isOk) showToast('削除に失敗しました', true);
     }
@@ -1337,6 +1412,7 @@
     }
     async function deleteStore(store, rec) {
       if (getStaffList().some(s => s.store === store)) { showToast('この店舗を使用中のスタッフがいるため削除できません', true); return; }
+      if (!(await requireAdminPassword())) return;
       const res = await window.dataSdk.delete(rec);
       if (!res.isOk) showToast('削除に失敗しました', true);
     }
@@ -1477,7 +1553,12 @@
       const bar = document.createElement('div'); bar.className = 'confirm-bar flex flex-nowrap items-center gap-2 ml-auto text-sm whitespace-nowrap';
       bar.innerHTML = `<span class="text-gray-600">${confirmedCount > 0 ? `確定済み${confirmedCount}件あり。本当に削除しますか？` : '削除しますか？'}</span>`;
       const yes = document.createElement('button'); yes.className = 'btn btn-danger'; yes.style.cssText='font-size:12px;padding:4px 10px;'; yes.textContent = 'はい';
-      yes.addEventListener('click', async () => { yes.disabled = true; yes.textContent = '...'; const res = await window.dataSdk.delete(rec); if (!res.isOk) showToast('削除に失敗しました', true); });
+      yes.addEventListener('click', async () => {
+        if (!(await requireAdminPassword())) return;
+        yes.disabled = true; yes.textContent = '...';
+        const res = await window.dataSdk.delete(rec);
+        if (!res.isOk) showToast('削除に失敗しました', true);
+      });
       const cancel = document.createElement('button'); cancel.className = 'btn btn-secondary'; cancel.style.cssText='font-size:12px;padding:4px 10px;'; cancel.textContent = 'キャンセル';
       cancel.addEventListener('click', () => bar.remove());
       bar.appendChild(yes); bar.appendChild(cancel); row.querySelector('div:last-child').appendChild(bar);
@@ -2210,11 +2291,29 @@
       lucide.createIcons();
     }
 
-    let calendarTouchStart = null, calendarTouchEnd = null, calendarSwipeAttached = false;
+    let calendarSwipeAttached = false;
     function setupCalendarSwipe() {
-      const grid = document.getElementById('calendar-grid'); if (calendarSwipeAttached) return; calendarSwipeAttached = true;
-      grid.addEventListener('touchstart', (e) => { calendarTouchStart = e.changedTouches[0].clientX; calendarTouchEnd = null; }, false);
-      grid.addEventListener('touchend', (e) => { calendarTouchEnd = e.changedTouches[0].clientX; const diff = calendarTouchStart - calendarTouchEnd; if (Math.abs(diff) > 50) { if (diff > 0) changeMonth(1); else changeMonth(-1); } calendarTouchStart = null; calendarTouchEnd = null; }, false);
+      const grid = document.getElementById('calendar-grid');
+      if (calendarSwipeAttached) return;
+      calendarSwipeAttached = true;
+      let startX = 0, startY = 0;
+      grid.addEventListener('touchstart', (e) => {
+        startX = e.changedTouches[0].clientX;
+        startY = e.changedTouches[0].clientY;
+      }, { passive: true });
+      grid.addEventListener('touchend', (e) => {
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const diffX = startX - endX;
+        const diffY = startY - endY;
+        // 縦の動きの方が大きい場合はスクロールと判断し、月切替しない
+        if (Math.abs(diffY) > Math.abs(diffX)) return;
+        // 横方向のスワイプが十分大きい場合のみ月切替
+        if (Math.abs(diffX) > 60) {
+          if (diffX > 0) changeMonth(1);
+          else changeMonth(-1);
+        }
+      }, { passive: true });
     }
 
     function showPriorityWarningModal(msg, cb) { document.getElementById('priority-warning-message').textContent = msg; priorityWarningState = { callback: cb }; document.getElementById('priority-warning-modal').classList.remove('hidden'); }
@@ -2316,7 +2415,7 @@
       const bar = document.createElement('div'); bar.className = 'confirm-bar flex flex-nowrap items-center gap-2 ml-auto text-sm whitespace-nowrap';
       bar.innerHTML = '<span class="text-gray-600">削除しますか？</span>';
       const yes = document.createElement('button'); yes.className = 'btn btn-danger'; yes.style.cssText='font-size:12px;padding:4px 10px;'; yes.textContent = 'はい';
-      yes.addEventListener('click', async () => { yes.disabled = true; yes.textContent = '...'; const res = await window.dataSdk.delete(record); if (!res.isOk) showToast('削除に失敗しました', true); });
+      yes.addEventListener('click', async () => { if (!(await requireAdminPassword())) return; yes.disabled = true; yes.textContent = '...'; const res = await window.dataSdk.delete(record); if (!res.isOk) showToast('削除に失敗しました', true); });
       const cancel = document.createElement('button'); cancel.className = 'btn btn-secondary'; cancel.style.cssText='font-size:12px;padding:4px 10px;'; cancel.textContent = 'キャンセル';
       cancel.addEventListener('click', () => { bar.remove(); actionsDiv.querySelectorAll('button:not(.confirm-bar button)').forEach(b => b.style.display = ''); });
       bar.appendChild(yes); bar.appendChild(cancel); actionsDiv.querySelectorAll('button:not(.confirm-bar button)').forEach(b => b.style.display = 'none'); actionsDiv.appendChild(bar);
@@ -2327,7 +2426,7 @@
       const bar = document.createElement('div'); bar.className = 'confirm-bar flex flex-nowrap items-center gap-2 ml-auto text-sm whitespace-nowrap';
       bar.innerHTML = '<span class="text-gray-600">削除しますか？</span>';
       const yes = document.createElement('button'); yes.className = 'btn btn-danger'; yes.style.cssText='font-size:12px;padding:4px 10px;'; yes.textContent = 'はい';
-      yes.addEventListener('click', async () => { yes.disabled = true; yes.textContent = '...'; const res = await window.dataSdk.delete(record); if (!res.isOk) showToast('削除に失敗しました', true); });
+      yes.addEventListener('click', async () => { if (!(await requireAdminPassword())) return; yes.disabled = true; yes.textContent = '...'; const res = await window.dataSdk.delete(record); if (!res.isOk) showToast('削除に失敗しました', true); });
       const cancel = document.createElement('button'); cancel.className = 'btn btn-secondary'; cancel.style.cssText='font-size:12px;padding:4px 10px;'; cancel.textContent = 'キャンセル';
       cancel.addEventListener('click', () => { bar.remove(); actionsDiv.querySelectorAll('button:not(.confirm-bar button)').forEach(b => b.style.display = ''); });
       bar.appendChild(yes); bar.appendChild(cancel); actionsDiv.querySelectorAll('button:not(.confirm-bar button)').forEach(b => b.style.display = 'none'); actionsDiv.appendChild(bar);
@@ -2443,6 +2542,8 @@
 
     const handler = {
       onDataChanged(data) {
+        // データ変更で再描画されてもスクロール位置が失われないように保存
+        const savedScrollY = window.scrollY;
         allRawData = data; classifyData(); refreshAllSelects(); staffFilterPanelInitialized = false;
         if (!document.getElementById('view-register').classList.contains('hidden')) {
           populateStaffSelect(); updateRegisterGuide();
@@ -2452,6 +2553,8 @@
         if (!document.getElementById('view-calendar').classList.contains('hidden')) { renderStaffFilterButtons(); calendarSwipeAttached = false; renderCalendar(); }
         if (!document.getElementById('view-status').classList.contains('hidden')) renderStatusView();
         if (!document.getElementById('view-staff').classList.contains('hidden')) renderStaffList();
+        // 再描画後にスクロール位置を復元
+        requestAnimationFrame(() => { window.scrollTo(0, savedScrollY); });
       }
     };
 
