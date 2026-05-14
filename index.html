@@ -690,6 +690,62 @@
     }
     .verify-btn svg { flex-shrink: 0; }
 
+    /* Filter toggle accordion */
+    .filter-toggle-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 9px 12px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gray-700);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.15s;
+    }
+    .filter-toggle-btn:hover { background: var(--gray-100); }
+    .filter-toggle-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary-mid);
+      color: var(--primary-dark);
+    }
+    .filter-toggle-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-toggle-btn.open #filter-toggle-chevron {
+      transform: rotate(180deg);
+    }
+    .filter-panel {
+      margin-top: 10px;
+      padding: 12px;
+      background: var(--gray-50);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .filter-row-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gray-600);
+      flex-shrink: 0;
+      padding: 6px 8px 0 0;
+      min-width: 36px;
+    }
+
     @media print {
       body * { visibility: hidden !important; }
       #print-modal, #print-modal * { visibility: visible !important; }
@@ -766,13 +822,26 @@
       <!-- Staff Selector (common to all steps) -->
       <div id="staff-selector-block" class="card" style="padding:14px 16px;margin-bottom:18px;">
         <label class="block mb-2 font-medium text-sm" style="color:var(--gray-700);">スタッフを選択</label>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="register-job-filter-buttons"></div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="register-store-filter-buttons"></div>
-          <select id="staff-name" class="w-full" style="margin-top:4px;" onchange="onStaffChange()">
-            <option value="" disabled selected>選択してください</option>
-          </select>
-          <p id="no-staff-msg" class="text-amber-600 text-sm hidden">スタッフを先に登録してください</p>
+        <select id="staff-name" class="w-full" onchange="onStaffChange()">
+          <option value="" disabled selected>選択してください</option>
+        </select>
+        <p id="no-staff-msg" class="text-amber-600 text-sm hidden mt-2">スタッフを先に登録してください</p>
+        <button type="button" id="filter-toggle-btn" onclick="toggleFilterPanel()" class="filter-toggle-btn">
+          <span class="filter-toggle-label">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span id="filter-toggle-text">絞り込み（職種・店舗）</span>
+          </span>
+          <svg id="filter-toggle-chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div id="filter-panel" class="hidden filter-panel">
+          <div class="filter-row">
+            <span class="filter-row-label">職種</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;" id="register-job-filter-buttons"></div>
+          </div>
+          <div class="filter-row">
+            <span class="filter-row-label">店舗</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;" id="register-store-filter-buttons"></div>
+          </div>
         </div>
       </div>
 
@@ -2158,12 +2227,36 @@
       setTimeout(() => { overlay.remove(); }, 1500);
     }
 
+    let filterPanelOpen = false;
+    function toggleFilterPanel() {
+      filterPanelOpen = !filterPanelOpen;
+      const panel = document.getElementById('filter-panel');
+      const btn = document.getElementById('filter-toggle-btn');
+      panel.classList.toggle('hidden', !filterPanelOpen);
+      btn.classList.toggle('open', filterPanelOpen);
+    }
+    function updateFilterToggleBtn() {
+      const btn = document.getElementById('filter-toggle-btn');
+      const txt = document.getElementById('filter-toggle-text');
+      if (!btn || !txt) return;
+      const parts = [];
+      if (registerJobFilter !== 'all') parts.push(registerJobFilter);
+      if (registerStoreFilter !== 'all') parts.push(registerStoreFilter);
+      if (parts.length) {
+        btn.classList.add('active');
+        txt.textContent = `絞り込み中：${parts.join(' / ')}`;
+      } else {
+        btn.classList.remove('active');
+        txt.textContent = '絞り込み（職種・店舗）';
+      }
+    }
+
     function renderRegisterJobFilterButtons() {
       const c = document.getElementById('register-job-filter-buttons'); c.innerHTML = '';
       [{value:'all',label:'全表示'}, ...getJobTypes().map(j => ({value:j,label:j}))].forEach(f => {
         const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = f.label;
         btn.className = f.value === registerJobFilter ? 'filter-btn active-primary' : 'filter-btn';
-        btn.addEventListener('click', () => { registerJobFilter = f.value; renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); }); c.appendChild(btn);
+        btn.addEventListener('click', () => { registerJobFilter = f.value; renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateFilterToggleBtn(); }); c.appendChild(btn);
       });
     }
     function renderRegisterStoreFilterButtons() {
@@ -2171,7 +2264,7 @@
       [{value:'all',label:'全表示'}, ...getStores().map(s => ({value:s,label:s}))].forEach(f => {
         const btn = document.createElement('button'); btn.type = 'button'; btn.textContent = f.label;
         btn.className = f.value === registerStoreFilter ? 'filter-btn active-teal' : 'filter-btn';
-        btn.addEventListener('click', () => { registerStoreFilter = f.value; renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); }); c.appendChild(btn);
+        btn.addEventListener('click', () => { registerStoreFilter = f.value; renderRegisterJobFilterButtons(); renderRegisterStoreFilterButtons(); populateStaffSelect(); updateFilterToggleBtn(); }); c.appendChild(btn);
       });
     }
 
