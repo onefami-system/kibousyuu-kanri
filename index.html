@@ -167,13 +167,15 @@
       flex-direction: column;
       gap: 2px;
       margin-top: 3px;
+      min-width: 0;
+      width: 100%;
     }
     .cal-event-badge {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 4px;
-      padding: 1px 6px;
+      gap: 3px;
+      padding: 1px 5px;
       border-radius: 6px;
       font-size: 10px;
       line-height: 1.55;
@@ -181,6 +183,8 @@
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .cal-event-badge .name {
       overflow: hidden;
@@ -194,7 +198,7 @@
       font-weight: 600;
       opacity: 0.85;
       flex-shrink: 0;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
     }
     .cal-event-badge.confirmed {
       box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.85), 0 0 0 1.5px #2f9e44;
@@ -942,8 +946,8 @@
               <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="1.5"/><rect x="13" y="5" width="8" height="14" rx="1.5"/></svg>
             </div>
             <div style="flex:1;min-width:0;">
-              <div class="type-card-title">半休×2</div>
-              <div class="type-card-desc">半休を2件登録（合計1.0日）</div>
+              <div class="type-card-title">半休</div>
+              <div class="type-card-desc">半休を1〜2件登録（0.5日〜1.0日）</div>
             </div>
             <div class="type-card-check">
               <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -995,7 +999,7 @@
           <div id="full-warning-area"></div>
         </div>
 
-        <!-- 半休×2: 日付2件 -->
+        <!-- 半休: 1件必須＋2件目は任意 -->
         <div id="half-day-section" class="hidden">
           <!-- 半休1 -->
           <div style="margin-bottom:18px;">
@@ -1031,11 +1035,20 @@
             <div id="half1-warning-area"></div>
           </div>
 
-          <!-- 半休2 -->
-          <div>
-            <div class="slot-label">
-              <span class="slot-num">2</span>
-              <span>2件目の半休を選んでください</span>
+          <!-- 半休2 追加ボタン（任意） -->
+          <div id="add-half2-container">
+            <button type="button" class="btn btn-secondary" style="width:100%;border:1.5px dashed var(--primary-mid);color:var(--primary);background:var(--primary-light);" onclick="openHalf2()">＋ もう1件の半休を追加（合計1.0日にする）</button>
+            <p style="font-size:12px;color:var(--gray-500);margin-top:6px;text-align:center;">半休1件（0.5日）のみで申請することもできます</p>
+          </div>
+
+          <!-- 半休2（任意） -->
+          <div id="half2-block" class="hidden">
+            <div class="slot-label" style="display:flex;align-items:center;justify-content:space-between;">
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span class="slot-num">2</span>
+                <span>2件目の半休を選んでください</span>
+              </span>
+              <button type="button" class="btn btn-secondary" style="font-size:12px;padding:4px 12px;" onclick="closeHalf2()">× 取消</button>
             </div>
             <div class="reg-cal-wrapper">
               <div class="reg-cal-head">
@@ -1305,7 +1318,7 @@
     // =============================================
     // ★ 管理者パスワード（必ず変更してください） ★
     // =============================================
-    const ADMIN_PASSWORD = 'onefami0901';
+    const ADMIN_PASSWORD = 'admin1234';
     // =============================================
 
     // 管理者パスワード認証
@@ -1879,8 +1892,9 @@
       fullDate: null,     // 全休: 'YYYY-MM-DD'
       half1Date: null,    // 半休1
       half1Time: null,    // 'am' | 'pm'
-      half2Date: null,
+      half2Date: null,    // 半休2（任意）
       half2Time: null,
+      half2Open: false,   // 半休2セクションの開閉状態
       // カレンダー表示用の年月（各セクション独立）
       calYear: 0,
       calMonth: 0,
@@ -1889,6 +1903,28 @@
       calYearH2: 0,
       calMonthH2: 0,
     };
+
+    // 半休2セクションの開閉
+    function openHalf2() {
+      registerState.half2Open = true;
+      document.getElementById('half2-block').classList.remove('hidden');
+      document.getElementById('add-half2-container').classList.add('hidden');
+      renderRegCalendars();
+      updateRunningTotal();
+      updateStep2NextBtn();
+    }
+    function closeHalf2() {
+      registerState.half2Open = false;
+      registerState.half2Date = null;
+      registerState.half2Time = null;
+      document.getElementById('half2-block').classList.add('hidden');
+      document.getElementById('add-half2-container').classList.remove('hidden');
+      updateTimePills();
+      renderSelectedDisplay();
+      renderCongestionWarnings();
+      updateRunningTotal();
+      updateStep2NextBtn();
+    }
 
     function initRegisterCalendars() {
       // 対象月（2か月先）を初期表示にする
@@ -1934,8 +1970,11 @@
           if (!registerState.fullDate) { showToast('日付を選択してください', true); return; }
         } else {
           if (!registerState.half1Date || !registerState.half1Time) { showToast('1件目の半休を選択してください', true); return; }
-          if (!registerState.half2Date || !registerState.half2Time) { showToast('2件目の半休を選択してください', true); return; }
-          if (registerState.half1Date === registerState.half2Date) { showToast('1件目と2件目は別の日付を選んでください', true); return; }
+          // 2件目は「追加」した場合のみ必須
+          if (registerState.half2Open) {
+            if (!registerState.half2Date || !registerState.half2Time) { showToast('2件目の半休を選択するか、「× 取消」で閉じてください', true); return; }
+            if (registerState.half1Date === registerState.half2Date) { showToast('1件目と2件目は別の日付を選んでください', true); return; }
+          }
         }
       }
 
@@ -1950,6 +1989,9 @@
         // 全休/半休 表示切替
         document.getElementById('full-day-section').classList.toggle('hidden', registerState.leaveType !== 'full');
         document.getElementById('half-day-section').classList.toggle('hidden', registerState.leaveType !== 'half');
+        // 半休2セクションの開閉状態を復元
+        document.getElementById('half2-block').classList.toggle('hidden', !registerState.half2Open);
+        document.getElementById('add-half2-container').classList.toggle('hidden', registerState.half2Open);
         renderRegCalendars();
         updateRunningTotal();
         updateStep2NextBtn();
@@ -2237,7 +2279,7 @@
       } else if (registerState.leaveType === 'half') {
         let t = 0;
         if (registerState.half1Date && registerState.half1Time) t += 0.5;
-        if (registerState.half2Date && registerState.half2Time) t += 0.5;
+        if (registerState.half2Open && registerState.half2Date && registerState.half2Time) t += 0.5;
         return t;
       }
       return 0;
@@ -2256,10 +2298,30 @@
       if (registerState.leaveType === 'full') {
         valid = !!registerState.fullDate;
       } else if (registerState.leaveType === 'half') {
-        valid = registerState.half1Date && registerState.half1Time && registerState.half2Date && registerState.half2Time && registerState.half1Date !== registerState.half2Date;
+        const half1Done = registerState.half1Date && registerState.half1Time;
+        if (registerState.half2Open) {
+          // 2件目を追加した場合は両方必須＋別日チェック
+          valid = half1Done && registerState.half2Date && registerState.half2Time && registerState.half1Date !== registerState.half2Date;
+        } else {
+          // 半休1件のみでもOK
+          valid = !!half1Done;
+        }
       }
       btn.disabled = !valid;
       btn.style.opacity = valid ? '1' : '0.5';
+    }
+
+    // STEP3/STEP4 共通：申請内容の行HTMLを生成（半休1件のみにも対応）
+    function buildSummaryRowsHtml() {
+      const shortLabel = (t) => timeLabel(t).replace('（9時〜14時）','').replace('（13時〜18時）','');
+      if (registerState.leaveType === 'full') {
+        return `<div class="summary-row"><span class="date-part">${fmtDate(registerState.fullDate)}</span><span class="type-part">全休</span></div>`;
+      }
+      let html = `<div class="summary-row"><span class="date-part">${fmtDate(registerState.half1Date)}</span><span class="type-part">${shortLabel(registerState.half1Time)}</span></div>`;
+      if (registerState.half2Open && registerState.half2Date && registerState.half2Time) {
+        html += `<div class="summary-row"><span class="date-part">${fmtDate(registerState.half2Date)}</span><span class="type-part">${shortLabel(registerState.half2Time)}</span></div>`;
+      }
+      return html;
     }
 
     function renderConfirmArea() {
@@ -2270,15 +2332,7 @@
       const jc = getJobColor(job);
       const sc = getStoreColor(store);
 
-      let rowsHtml = '';
-      if (registerState.leaveType === 'full') {
-        rowsHtml = `<div class="summary-row"><span class="date-part">${fmtDate(registerState.fullDate)}</span><span class="type-part">全休</span></div>`;
-      } else {
-        rowsHtml = `
-          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half1Date)}</span><span class="type-part">${timeLabel(registerState.half1Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
-          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half2Date)}</span><span class="type-part">${timeLabel(registerState.half2Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
-        `;
-      }
+      const rowsHtml = buildSummaryRowsHtml();
 
       area.innerHTML = `
         <div class="summary-card">
@@ -2313,15 +2367,7 @@
       const jc = getJobColor(job);
       const sc = getStoreColor(store);
 
-      let rowsHtml = '';
-      if (registerState.leaveType === 'full') {
-        rowsHtml = `<div class="summary-row"><span class="date-part">${fmtDate(registerState.fullDate)}</span><span class="type-part">全休</span></div>`;
-      } else {
-        rowsHtml = `
-          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half1Date)}</span><span class="type-part">${timeLabel(registerState.half1Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
-          <div class="summary-row"><span class="date-part">${fmtDate(registerState.half2Date)}</span><span class="type-part">${timeLabel(registerState.half2Time).replace('（9時〜14時）','').replace('（13時〜18時）','')}</span></div>
-        `;
-      }
+      const rowsHtml = buildSummaryRowsHtml();
 
       area.innerHTML = `
         <div class="summary-card">
@@ -2350,20 +2396,39 @@
       const staffName = document.getElementById('staff-name').value;
       if (!staffName) { showToast('スタッフが選択されていません', true); return; }
 
-      // 送信データ構築
+      // 送信データ構築（半休2は追加した場合のみ）
       const dates = [];
       if (registerState.leaveType === 'full') {
         dates.push({ date: registerState.fullDate, type: '全休' });
       } else {
         dates.push({ date: registerState.half1Date, type: timeLabel(registerState.half1Time) });
-        dates.push({ date: registerState.half2Date, type: timeLabel(registerState.half2Time) });
+        if (registerState.half2Open && registerState.half2Date && registerState.half2Time) {
+          dates.push({ date: registerState.half2Date, type: timeLabel(registerState.half2Time) });
+        }
       }
 
-      // 重複チェック
+      // 重複チェック（同日・同種別）
       for (const d of dates) {
         if (requestRecords.some(rec => rec.staff_name === staffName && rec.request_date === d.date && rec.leave_type === d.type)) {
           const dateFormatted = new Date(d.date + 'T00:00:00').toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
           showToast(`${staffName}さんの${dateFormatted}（${d.type}）は既に登録されています`, true);
+          return;
+        }
+      }
+
+      // 月合計チェック（既存申請＋今回申請が1.0日を超えないこと）
+      const monthTotals = {};
+      for (const d of dates) {
+        const ym = d.date.substring(0, 7); // 'YYYY-MM'
+        monthTotals[ym] = (monthTotals[ym] || 0) + getLeaveValue(d.type);
+      }
+      for (const [ym, addVal] of Object.entries(monthTotals)) {
+        const existing = requestRecords
+          .filter(rec => rec.staff_name === staffName && rec.request_date && rec.request_date.startsWith(ym))
+          .reduce((sum, rec) => sum + getLeaveValue(rec.leave_type), 0);
+        if (existing + addVal > 1.0) {
+          const m = parseInt(ym.split('-')[1]);
+          showToast(`${m}月の希望休が合計1日分を超えるため申請できません（登録済み：${existing}日＋今回：${addVal}日）`, true);
           return;
         }
       }
@@ -2396,6 +2461,15 @@
       submitBtn.textContent = '申請する';
 
       if (ok) {
+        // 対象月を既定値（翌々月）に戻す（再申請で一時変更されていた場合のリセット）
+        const tm = getTargetMonth();
+        targetYear = tm.year;
+        targetMonth = tm.month;
+        const heading = document.getElementById('form-heading-text');
+        const subtitle = document.getElementById('form-subtitle-text');
+        if (heading) heading.textContent = `${targetMonth}月 希望休を申請`;
+        if (subtitle) subtitle.textContent = `${targetYear}年${targetMonth}月分の希望休を4ステップで登録します`;
+        initRegisterCalendars();
         // 状態リセット
         resetRegisterState();
         showSuccessAnimation();
@@ -2413,9 +2487,12 @@
       registerState.half1Time = null;
       registerState.half2Date = null;
       registerState.half2Time = null;
+      registerState.half2Open = false;
       initRegisterCalendars();
       document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
       document.querySelectorAll('.time-pill').forEach(p => p.classList.remove('selected'));
+      const half2Block = document.getElementById('half2-block'); if (half2Block) half2Block.classList.add('hidden');
+      const addHalf2 = document.getElementById('add-half2-container'); if (addHalf2) addHalf2.classList.remove('hidden');
       const staffSel = document.getElementById('staff-name'); if (staffSel) staffSel.value = '';
       const n1 = document.getElementById('step1-next-btn'); if (n1) { n1.disabled = true; n1.style.opacity = '0.5'; }
       const n2 = document.getElementById('step2-next-btn'); if (n2) { n2.disabled = true; n2.style.opacity = '0.5'; }
@@ -2588,7 +2665,7 @@
       for (let i = 0; i < startDow; i++) { const c = document.createElement('div'); c.className = 'bg-white p-1 min-h-[3rem]'; grid.appendChild(c); }
       for (let d = 1; d <= lastDay; d++) {
         const dateStr = `${prefix}-${String(d).padStart(2,'0')}`;
-        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.style.cssText = 'background:#fff;padding:4px 3px;min-height:3.5rem;cursor:pointer;font-size:13px;';
+        const cell = document.createElement('div'); cell.className = 'cal-day'; cell.style.cssText = 'background:#fff;padding:4px 3px;min-height:3.5rem;cursor:pointer;font-size:13px;overflow:hidden;';
         if (dateStr === selectedDate) cell.classList.add('selected');
         cell.innerHTML = `<div style="font-weight:600;color:var(--gray-800);padding:0 2px;">${d}</div>`;
         // PC: ドロップターゲットとして登録
@@ -2919,7 +2996,7 @@
           // STEP2 表示中ならカレンダー再描画（混雑度反映）
           if (registerState.step === 2) renderRegCalendars();
         }
-        if (!document.getElementById('view-calendar').classList.contains('hidden')) { renderStaffFilterButtons(); calendarSwipeAttached = false; renderCalendar(); }
+        if (!document.getElementById('view-calendar').classList.contains('hidden')) { renderStaffFilterButtons(); renderCalendar(); }
         if (!document.getElementById('view-status').classList.contains('hidden')) renderStatusView();
         if (!document.getElementById('view-staff').classList.contains('hidden')) renderStaffList();
         // 再描画後にスクロール位置を復元
